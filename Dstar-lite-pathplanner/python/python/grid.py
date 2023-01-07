@@ -29,9 +29,8 @@ class OccupancyGridMap:
 
         # the obstacle map
         self.occupancy_grid_map = np.zeros(self.map_extents, dtype=np.uint8)
-        self.occupancy_grid_map[50, 50] = OBSTACLE
         # we can define here all the static obstacles
-
+        self.occupancy_grid_map[50, 50] = OBSTACLE
         self.occupancy_grid_map[7, 8] = OBSTACLE
 
         # obstacles

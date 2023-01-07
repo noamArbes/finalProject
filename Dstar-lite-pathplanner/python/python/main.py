@@ -15,8 +15,8 @@ if __name__ == '__main__':
     V (x=2, y=0)
     x, row
     """
-    x_dim = 100
-    y_dim = 80
+    x_dim = 80
+    y_dim = 100
     start = (10, 10)
     goal = (40, 70)
     view_range = 5
@@ -69,6 +69,8 @@ if __name__ == '__main__':
             if new_observation["pos"] == UNOCCUPIED:
                 dstar.global_map.remove_obstacle(pos=new_observation["pos"])
         """
+        if new_position == goal:  # added to prevent error in the end (Dana)
+            gui.done = True
 
         if new_observation is not None:
             old_map = new_map
@@ -85,3 +87,4 @@ if __name__ == '__main__':
 
             # d star
             path, g, rhs = dstar.move_and_replan(robot_position=new_position)
+    print("Session time: " + str(gui.total_time / 1000) + " seconds")  # converts time to seconds

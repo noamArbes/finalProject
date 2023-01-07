@@ -13,6 +13,11 @@ GRAY1 = (145, 145, 102)  # GRAY1
 OBSTACLE = (77, 77, 51)  # GRAY2
 LOCAL_GRID = (0, 0, 80)  # BLUE
 
+# Start timer
+clock = pygame.time.Clock()
+total_time = 0
+
+
 colors = {
     0: UNOCCUPIED,
     1: GOAL,
@@ -42,6 +47,10 @@ class Animation:
         self.observation = {"pos": None, "type": None}
         self.goal = goal
         self.viewing_range = viewing_range
+        self.clock = pygame.time.Clock()
+        self.total_time = 0
+        self.cont = False  # if true - long press on space continue the movement, also backspace set to true(Dana)
+
 
         pygame.init()
 
@@ -110,11 +119,12 @@ class Animation:
                                                       self.height])
 
     def run_game(self, path=None):
+
+        self.total_time += clock.tick(60)
         if path is None:
             path = []
 
         grid_cell = None
-        self.cont = False
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:  # if user clicked close
@@ -133,6 +143,7 @@ class Animation:
                     self.cont = True
                 else:
                     self.cont = False
+
 
             # set obstacle by holding left-click
             elif pygame.mouse.get_pressed()[0]:
@@ -182,7 +193,7 @@ class Animation:
                                   self.width,
                                   self.height])
 
-        self.display_path(path=path)
+        self.display_path(path=path)  # if we disable this the path will disappear (Dana)
         # fill in the goal cell with green
         pygame.draw.rect(self.screen, GOAL, [(self.margin + self.width) * self.goal[1] + self.margin,
                                              (self.margin + self.height) * self.goal[0] + self.margin,
@@ -207,7 +218,7 @@ class Animation:
         pygame.draw.circle(surface=self.screen, color=BLACK, center=robot_center, radius=70.0, width=2) # we need to pay attention that the function recognizes obstacles in the area of the squre that was drawn before.
 
         # set game tick
-        self.clock.tick(20)
+        self.clock.tick(60)  #changed to 60 like we told Tal (Dana)
 
 
 
