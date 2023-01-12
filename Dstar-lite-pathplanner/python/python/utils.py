@@ -35,9 +35,10 @@ def heuristic(p: (int, int), q: (int, int)) -> float:
     :param q: (x,y)
     :return: manhattan distance
     """
+    #This returns an error when we put too much obstacles under the robot (Dana)
     return math.sqrt((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)
 
-
+#This checks only 4 points around the robot but cant go באלכסון (Dana)
 def get_movements_4n(x: int, y: int) -> List:
     """
     get all possible 4-connectivity movements.
@@ -49,6 +50,7 @@ def get_movements_4n(x: int, y: int) -> List:
             (x + 0, y - 1)]
 
 
+#זה בודק 8 נקודות מסביב לרובוט אבל אם יש לו בעיה עם המקרה קיצון באלכסון (Dana)
 def get_movements_8n(x: int, y: int) -> List:
     """
     get all possible 8-connectivity movements.

@@ -1,10 +1,12 @@
 import numpy as np
 from utils import get_movements_4n, get_movements_8n, heuristic, Vertices, Vertex
 from typing import Dict, List
+import math
 import pygame
 
 OBSTACLE = 255
 UNOCCUPIED = 0
+count = 0
 
 
 class OccupancyGridMap:
@@ -22,7 +24,6 @@ class OccupancyGridMap:
         """
         self.x_dim = x_dim
         self.y_dim = y_dim
-
 
         # the map extents in units [m]
         self.map_extents = (x_dim, y_dim)
@@ -83,7 +84,7 @@ class OccupancyGridMap:
             return [node for node in neighbors if self.in_bounds(node) and self.is_unoccupied(node)]
         return [node for node in neighbors if self.in_bounds(node)]
 
-    def succ(self, vertex: (int, int), avoid_obstacles: bool = False) -> list:
+    def succ(self, vertex: (int, int), avoid_obstacles: bool = True) -> list:
         """
         :param avoid_obstacles:
         :param vertex: vertex you want to find direct successors from
@@ -97,7 +98,8 @@ class OccupancyGridMap:
             movements = get_movements_8n(x=x, y=y)
 
         # not needed. Just makes aesthetics to the path
-        if (x + y) % 2 == 0: movements.reverse()
+        if (x + y) % 2 == 0:
+            movements.reverse()
 
         filtered_movements = self.filter(neighbors=movements, avoid_obstacles=avoid_obstacles)
         return list(filtered_movements)
@@ -109,6 +111,7 @@ class OccupancyGridMap:
         """
         (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
         (row, col) = (x, y)
+        print(row, col)
         self.occupancy_grid_map[row, col] = OBSTACLE
 
     def remove_obstacle(self, pos: (int, int)):
@@ -120,34 +123,100 @@ class OccupancyGridMap:
         (row, col) = (x, y)
         self.occupancy_grid_map[row, col] = UNOCCUPIED
 
-    def local_observation(self, global_position: (int, int), view_range: int = 2) -> Dict:
-        #This is the function we should change, according to the change of the radius around the robot(that is in gui)
-        """
-        :param global_position: position of robot in the global map frame
-        :param view_range: how far ahead we should look
-        :return: dictionary of new observations
-        """
+    # def local_observation(self, global_position: (int, int), view_range: int = 7) -> Dict:
+    #    #This is the function we should change, according to the change of the radius around the robot(that is in gui)
+    #    """
+    #    :param global_position: position of robot in the global map frame
+    #    :param view_range: how far ahead we should look
+    #    :return: dictionary of new observations
+    #    """
+    #    (px, py) = global_position
+    #    print(global_position)
+    #    #nodes = [(x, y) for x in range(px - view_range, px + view_range + 1)
+    #    #         for y in range(py - view_range, py + view_range + 1)
+    #    #         if self.in_bounds((x, y))]
+    #    nodes = [(x, y) for x in range(px - view_range, px + view_range + 1)
+    #             for y in range(py - view_range, py + view_range + 1)
+    #             if self.in_bounds((x, y)) and ((x - px) ** 2 + (y - py) ** 2 <= view_range ** 2)]
+    #    return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
+
+    def local_observation(self, global_position: (int, int), view_range: int = 7) -> Dict:
         (px, py) = global_position
-        nodes = [(x, y) for x in range(px - view_range, px + view_range + 1)
-                 for y in range(py - view_range, py + view_range + 1)
-                 if self.in_bounds((x, y))]
+        print(global_position)
+        # saves all the coordinates in the circle range
+        nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
+                 for y in range(py - view_range - 1, py + view_range + 1)
+                 if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
+        # help prints (Dana)
+        #for node in nodes:
+        #    print(node, math.dist(node, global_position))
         return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
 
-#import math
+    def count_obstacles_local_observation(self, count, global_position: (int, int), view_range: int = 7):
+        (px, py) = global_position
+        print(global_position)
+        nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
+                 for y in range(py - view_range - 1, py + view_range + 1)
+                 if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
+        # help prints (Dana)
+        for node in nodes:
+            if not self.is_unoccupied(pos=node):
+                count += 1
+        return count
 
-#def local_observation(self, global_position: (int, int), view_range: int = 70) -> Dict:
-    #This function cuts out the nodes that are out of the range of 70, but it causes problems in the main
- #   """
-  #  :param global_position: position of robot in the global map frame
-   # :param view_range: how far ahead we should look
-    #:return: dictionary of new observations
-    #"""
-    #(px, py) = global_position
-    #nodes = [(x, y) for x in range(px - view_range, px + view_range + 1)
-     #        for y in range(py - view_range, py + view_range + 1)
-      #       if self.in_bounds((x, y))]
-   # nodes = [node for node in nodes if math.sqrt((node[0] - px) ** 2 + (node[1] - py) ** 2) <= view_range]
-   # return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
+    def minimal_distance_local_observation(self, global_position: (int, int), view_range: int = 7):
+        (px, py) = global_position
+        print(global_position)
+        nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
+                 for y in range(py - view_range - 1, py + view_range + 1)
+                 if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
+        min_dist = 7.0
+        for node in nodes:
+            if not self.is_unoccupied(pos=node):
+                dist = math.dist(node, global_position)
+                if min_dist > dist:
+                    min_dist = dist
+        return min_dist
+
+    def average_distance_local_observation(self, global_position: (int, int), view_range: int = 7):
+        (px, py) = global_position
+        print(global_position)
+        nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
+                 for y in range(py - view_range - 1, py + view_range + 1)
+                 if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
+        total_distance = 0
+        obstacles = []
+        for node in nodes:
+            if not self.is_unoccupied(pos=node):  # means that it is an obstacle
+                obstacles.append(node)
+        for i in range(len(obstacles)):
+            for j in range(i + 1, len(obstacles)):
+                # calculate the distance between the current pair of obstacles
+                x1, y1 = obstacles[i]
+                x2, y2 = obstacles[j]
+                distance = math.dist(obstacles[i], obstacles[j])
+                print("dist", distance)
+                total_distance += distance
+        num_obstacles = len(obstacles)
+        if num_obstacles > 1:
+            average_distance = total_distance / (num_obstacles*(num_obstacles-1)/2)
+            return average_distance
+        return 0
+# import math
+
+# def local_observation(self, global_position: (int, int), view_range: int = 70) -> Dict:
+# This function cuts out the nodes that are out of the range of 70, but it causes problems in the main
+#   """
+#  :param global_position: position of robot in the global map frame
+# :param view_range: how far ahead we should look
+#:return: dictionary of new observations
+# """
+# (px, py) = global_position
+# nodes = [(x, y) for x in range(px - view_range, px + view_range + 1)
+#        for y in range(py - view_range, py + view_range + 1)
+#       if self.in_bounds((x, y))]
+# nodes = [node for node in nodes if math.sqrt((node[0] - px) ** 2 + (node[1] - py) ** 2) <= view_range]
+# return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
 
 
 class SLAM:
@@ -177,7 +246,16 @@ class SLAM:
         # rescan local area
         local_observation = self.ground_truth_map.local_observation(global_position=global_position,
                                                                     view_range=self.view_range)
-
+        num_obstacles = self.ground_truth_map.count_obstacles_local_observation(0,
+                                                                                global_position=global_position,
+                                                                                view_range=self.view_range)
+        print(num_obstacles)
+        min_distance = self.ground_truth_map.minimal_distance_local_observation(global_position=global_position,
+                                                                                view_range=self.view_range)
+        print("minimun distance:", min_distance)
+        average_distance = self.ground_truth_map.average_distance_local_observation(global_position=global_position,
+                                                                                view_range=self.view_range)
+        print("average distance:", average_distance)
         vertices = self.update_changed_edge_costs(local_grid=local_observation)
         return vertices, self.slam_map
 

@@ -27,7 +27,7 @@ colors = {
 
 class Animation:
     def __init__(self,
-                 title="D* Lite Path Planning",
+                 title="Simulation",
                  width=10,
                  height=10,
                  margin=0,
@@ -118,8 +118,8 @@ class Animation:
                                                        self.width,
                                                       self.height])
 
-    def run_game(self, path=None):
 
+    def run_game(self, path=None):
         self.total_time += clock.tick(60)
         if path is None:
             path = []
@@ -206,7 +206,7 @@ class Animation:
                             self.current[0] * (self.height + self.margin) + self.height / 2) + self.margin]
 
         # draw robot position as red circle
-        pygame.draw.circle(self.screen, START, robot_center, round(self.width / 2) - 2)
+        pygame.draw.circle(self.screen, START, robot_center, round(self.width / 2))
 
         # draw robot local grid map (viewing range - changed to a circle, need to change the obstacle viewer to the radius we defined)
      #   pygame.draw.rect(self.screen, LOCAL_GRID,
@@ -215,7 +215,8 @@ class Animation:
         #                  2 * self.viewing_range * (self.height + self.margin),
          #                 2 * self.viewing_range * (self.width + self.margin)], 2)
 
-        pygame.draw.circle(surface=self.screen, color=BLACK, center=robot_center, radius=70.0, width=2) # we need to pay attention that the function recognizes obstacles in the area of the squre that was drawn before.
+        # we need to pay attention that the function recognizes obstacles in the area of the squre that was drawn before
+        pygame.draw.circle(surface=self.screen, color=BLACK, center=robot_center, radius=70.0, width=2)
 
         # set game tick
         self.clock.tick(60)  #changed to 60 like we told Tal (Dana)

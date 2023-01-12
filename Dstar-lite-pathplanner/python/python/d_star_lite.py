@@ -105,7 +105,7 @@ class DStarLite:
         return new_edges_and_old_costs
 
     def move_and_replan(self, robot_position: (int, int)):
-        path = [robot_position]
+        path = [robot_position]  # starts in (10,10) (Dana)
         self.s_start = robot_position
         self.s_last = self.s_start
         self.compute_shortest_path()
