@@ -2,11 +2,11 @@ import numpy as np
 from utils import get_movements_4n, get_movements_8n, heuristic, Vertices, Vertex
 from typing import Dict, List
 import math
+import csv
 import pygame
 
 OBSTACLE = 255
 UNOCCUPIED = 0
-count = 0
 
 
 class OccupancyGridMap:
@@ -148,17 +148,18 @@ class OccupancyGridMap:
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
         # help prints (Dana)
-        #for node in nodes:
+        # for node in nodes:
         #    print(node, math.dist(node, global_position))
         return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
 
-    def count_obstacles_local_observation(self, count, global_position: (int, int), view_range: int = 7):
+    def count_obstacles_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
         print(global_position)
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
         # help prints (Dana)
+        count = 0
         for node in nodes:
             if not self.is_unoccupied(pos=node):
                 count += 1
@@ -176,6 +177,8 @@ class OccupancyGridMap:
                 dist = math.dist(node, global_position)
                 if min_dist > dist:
                     min_dist = dist
+        if min_dist >= 7.0:
+            return 0
         return min_dist
 
     def average_distance_local_observation(self, global_position: (int, int), view_range: int = 7):
@@ -192,16 +195,49 @@ class OccupancyGridMap:
         for i in range(len(obstacles)):
             for j in range(i + 1, len(obstacles)):
                 # calculate the distance between the current pair of obstacles
-                x1, y1 = obstacles[i]
-                x2, y2 = obstacles[j]
                 distance = math.dist(obstacles[i], obstacles[j])
                 print("dist", distance)
                 total_distance += distance
         num_obstacles = len(obstacles)
         if num_obstacles > 1:
-            average_distance = total_distance / (num_obstacles*(num_obstacles-1)/2)
+            average_distance = total_distance / (num_obstacles * (num_obstacles - 1) / 2)
             return average_distance
         return 0
+
+    def largest_angle_local_observation(self, global_position: (int, int), view_range: int = 7):
+        (px, py) = global_position
+        print(global_position)
+        nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
+                 for y in range(py - view_range - 1, py + view_range + 1)
+                 if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
+        obstacles = []
+        for node in nodes:
+            if not self.is_unoccupied(pos=node):  # means that it is an obstacle
+                obstacles.append(node)
+        largest_angle = 0
+        angles = []
+        for x, y in obstacles:
+            # calculate the angle between the center of the circle and the obstacle in radians
+            angle = math.atan2(y - py, x - px)
+            # convert the angle from radians to degrees
+            angle = math.degrees(angle)
+            # add the angle to the list
+            angles.append(angle)
+        # sort the angles in ascending order
+        angles.sort()
+        # initialize the largest free angle
+        largest_free_angle = 0
+        # iterate through the sorted angles
+        for i in range(len(angles) - 1):
+            # calculate the difference between the current angle and the next one
+            angle_diff = angles[i + 1] - angles[i]
+            # update the largest free angle if necessary
+            largest_free_angle = max(largest_free_angle, angle_diff)
+        if len(obstacles) == 2:
+            return (360 - largest_free_angle)
+        return largest_free_angle
+
+
 # import math
 
 # def local_observation(self, global_position: (int, int), view_range: int = 70) -> Dict:
@@ -225,6 +261,7 @@ class SLAM:
         self.slam_map = OccupancyGridMap(x_dim=map.x_dim,
                                          y_dim=map.y_dim)
         self.view_range = view_range
+        self.vector = []
 
     def set_ground_truth_map(self, gt_map: OccupancyGridMap):
         self.ground_truth_map = gt_map
@@ -246,16 +283,20 @@ class SLAM:
         # rescan local area
         local_observation = self.ground_truth_map.local_observation(global_position=global_position,
                                                                     view_range=self.view_range)
-        num_obstacles = self.ground_truth_map.count_obstacles_local_observation(0,
-                                                                                global_position=global_position,
+        num_obstacles = self.ground_truth_map.count_obstacles_local_observation(global_position=global_position,
                                                                                 view_range=self.view_range)
         print(num_obstacles)
         min_distance = self.ground_truth_map.minimal_distance_local_observation(global_position=global_position,
                                                                                 view_range=self.view_range)
         print("minimun distance:", min_distance)
         average_distance = self.ground_truth_map.average_distance_local_observation(global_position=global_position,
-                                                                                view_range=self.view_range)
-        print("average distance:", average_distance)
+                                                                                    view_range=self.view_range)
+        print("average distance:", average_distance, min_distance)
+        largest_angle = self.ground_truth_map.largest_angle_local_observation(global_position=global_position,
+                                                                              view_range=self.view_range)
+        status = (num_obstacles, min_distance, average_distance, largest_angle)
+        self.vector.append(status)
+        print("vector: ", self.vector)
         vertices = self.update_changed_edge_costs(local_grid=local_observation)
         return vertices, self.slam_map
 

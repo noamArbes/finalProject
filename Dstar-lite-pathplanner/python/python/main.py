@@ -1,6 +1,11 @@
 from gui import Animation
 from d_star_lite import DStarLite
 from grid import OccupancyGridMap, SLAM
+import pandas as pd
+
+import csv
+import os
+
 
 OBSTACLE = 255
 UNOCCUPIED = 0
@@ -88,3 +93,11 @@ if __name__ == '__main__':
             # d star
             path, g, rhs = dstar.move_and_replan(robot_position=new_position)
     print("Session time: " + str(gui.total_time / 1000) + " seconds")  # converts time to seconds
+    print(slam.vector)
+
+    with open('slam.vector.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        # Write the vector to the CSV file
+        writer.writerows(slam.vector)
+    os.startfile("slam.vector.csv")
+

@@ -124,6 +124,10 @@ class Animation:
         if path is None:
             path = []
 
+        if path:
+            (x, y) = path[1]
+            self.set_position((x, y))
+
         grid_cell = None
         for event in pygame.event.get():
 
@@ -131,18 +135,18 @@ class Animation:
                 print("quit")
                 self.done = True  # flag that we are done so we can exit loop
 
-            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) or self.cont:
-                # space bar pressed. call next action
-                if path:
-                    (x, y) = path[1]
-                    self.set_position((x, y))
-
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
-                print("backspace automates the press space")
-                if not self.cont:
-                    self.cont = True
-                else:
-                    self.cont = False
+            #elif (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) or self.cont:
+            #    # space bar pressed. call next action
+            #    if path:
+            #        (x, y) = path[1]
+            #        self.set_position((x, y))
+#
+            #elif event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
+            #    print("backspace automates the press space")
+            #    if not self.cont:
+            #        self.cont = True
+            #    else:
+            #        self.cont = False
 
 
             # set obstacle by holding left-click
