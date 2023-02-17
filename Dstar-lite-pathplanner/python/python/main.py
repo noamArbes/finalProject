@@ -1,13 +1,17 @@
 from gui import Animation
 from d_star_lite import DStarLite
 from grid import OccupancyGridMap, SLAM
+from Dynamic import dynamic_obs
 import pandas as pd
 
 import csv
 import os
+import pygame
+import random
 
 
 OBSTACLE = 255
+DYN_OBSTACLE = 100
 UNOCCUPIED = 0
 
 if __name__ == '__main__':
@@ -25,6 +29,7 @@ if __name__ == '__main__':
     start = (10, 10)
     goal = (40, 70)
     view_range = 7
+
 
     gui = Animation(title="Simulation",
                     width=10,
@@ -56,16 +61,23 @@ if __name__ == '__main__':
 
     # move and compute path
     path, g, rhs = dstar.move_and_replan(robot_position=new_position)
+    
+    dyn = dynamic_obs(x=30,y=30)
+
+#    Dana = moving_obs(map = new_map)
 
     while not gui.done:
         # update the map
         # print(path)
         # drive gui
         gui.run_game(path=path)
+        dyn.set_dynamic(30,30)
 
         new_position = gui.current
         new_observation = gui.observation
         new_map = gui.world
+
+
 
         """
         if new_observation is not None:
@@ -95,6 +107,7 @@ if __name__ == '__main__':
     print("Session time: " + str(gui.total_time / 1000) + " seconds")  # converts time to seconds
     print(slam.vector)
 
+# export csv file (Dana)
     with open('slam.vector.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         # Write the vector to the CSV file
