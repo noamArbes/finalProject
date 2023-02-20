@@ -7,6 +7,7 @@ import pygame
 
 
 DYN_OBSTACLE = 100
+
 UNOCCUPIED = 0
 OBSTACLE = 255
 
@@ -18,7 +19,7 @@ class dynamic_obs:
     def set_dynamic(self, x, y):
 
         (row, col) = (x, y)
-        print('here')
+        #print('here')
 #        pygame.draw.circle(self.screen, (0,0,0), (x,y), 70)
 
 

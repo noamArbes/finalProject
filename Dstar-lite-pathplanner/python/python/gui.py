@@ -13,6 +13,7 @@ START = (255, 0, 0)  # RED
 GRAY1 = (145, 145, 102)  # GRAY1
 OBSTACLE = (77, 77, 51)  # GRAY2
 DYN_OBSTACLE = (0, 0, 0)  # BLACK
+DYN_OBSTACLE_T2 = (0, 0, 0)  # BLACK
 LOCAL_GRID = (0, 0, 80)  # BLUE
 
 # Start timer
@@ -24,7 +25,8 @@ colors = {
     0: UNOCCUPIED,
     1: GOAL,
     255: OBSTACLE,
-    100: DYN_OBSTACLE
+    100: DYN_OBSTACLE,
+    150: DYN_OBSTACLE_T2
 }
 
 
@@ -57,6 +59,7 @@ class Animation:
         self.total_time = 0
         self.cont = False  # if true - long press on space continue the movement, also backspace set to true(Dana)
         self.counter = 0
+        self.counter_t2 = 0
         pygame.init()
 
         # Set the 'width' and 'height' of the screen
@@ -214,6 +217,7 @@ class Animation:
                                   self.height])
 
 
+
         if self.counter == 2:
             for row in range(self.x_dim):
                 for column in range(self.y_dim):
@@ -221,18 +225,36 @@ class Animation:
                     if self.world.occupancy_grid_map[row][column] == 100:
                         # set the location in the grid map
                         r = row - 1
+                        c = column
+                        grid_cell = (r, c)
+                        remove_cell = (row,column)
+                        if self.world.is_unoccupied(grid_cell):
+                            #print(grid_cell)
+                            self.world.set_dynamic_obstacle(grid_cell)
+                            self.observation = {"pos": grid_cell, "type": DYN_OBSTACLE}
+                            self.world.remove_obstacle(remove_cell)
+                            self.observation = {"pos": remove_cell, "type": UNOCCUPIED}
+                            self.counter = 0
+        self.counter += 1
+
+        if self.counter_t2 == 2:
+            for row in range(self.x_dim):
+                for column in range(self.y_dim):
+                    # color the cells (background)
+                    if self.world.occupancy_grid_map[row][column] == 150:
+                        # set the location in the grid map
+                        r = row - 1
                         c = column - 1
                         grid_cell = (r, c)
                         remove_cell = (row,column)
                         if self.world.is_unoccupied(grid_cell):
-                            print(grid_cell)
-                            self.world.set_dynamic_obstacle(grid_cell)
-                            self.observation = {"pos": grid_cell, "type": DYN_OBSTACLE}
-                        self.world.remove_obstacle(remove_cell)
-                        self.observation = {"pos": remove_cell, "type": UNOCCUPIED}
-                        self.counter = 0
-
-        self.counter += 1
+                            #print(grid_cell)
+                            self.world.set_dynamic_obstacle_t2(grid_cell)
+                            self.observation = {"pos": grid_cell, "type": DYN_OBSTACLE_T2}
+                            self.world.remove_obstacle(remove_cell)
+                            self.observation = {"pos": remove_cell, "type": UNOCCUPIED}
+                            self.counter_t2 = 0
+        self.counter_t2 += 1
 
 
         self.display_path(path=path)  # if we disable this the path will disappear (Dana)

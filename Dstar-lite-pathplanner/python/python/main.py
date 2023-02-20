@@ -12,6 +12,7 @@ import random
 
 OBSTACLE = 255
 DYN_OBSTACLE = 100
+DYN_OBSTACLE_T2 = 150
 UNOCCUPIED = 0
 
 if __name__ == '__main__':

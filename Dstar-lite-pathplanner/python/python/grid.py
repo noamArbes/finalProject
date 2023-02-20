@@ -9,6 +9,7 @@ import pygame
 
 OBSTACLE = 255
 DYN_OBSTACLE = 100
+DYN_OBSTACLE_T2 = 150
 UNOCCUPIED = 0
 
 
@@ -37,9 +38,11 @@ class OccupancyGridMap:
         self.occupancy_grid_map[50, 50] = OBSTACLE
         self.occupancy_grid_map[7, 8] = OBSTACLE
         #d = self.set_dynamic_obstacle(20,20)
+        # we can define here all the dynamic obstacles (Noam)
         self.occupancy_grid_map[40, 40] = DYN_OBSTACLE
+        self.occupancy_grid_map[20, 20] = DYN_OBSTACLE_T2
+        self.occupancy_grid_map[45, 0] = DYN_OBSTACLE_T2
 
-        self.occupancy_grid_map[20, 20] = DYN_OBSTACLE
         # obstacles
         self.visited = {}
         self.exploration_setting = exploration_setting
@@ -127,11 +130,23 @@ class OccupancyGridMap:
         :param pos: cell position we wish to set obstacle
         :return: None
         """
-
         (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
         (row, col) = (x, y)
-        print('here')
+        #  print('here')
         self.occupancy_grid_map[row, col] = DYN_OBSTACLE
+
+    def set_dynamic_obstacle_t2(self, pos: (int, int)):
+        """
+        :param pos: cell position we wish to set obstacle
+        :return: None
+        """
+        (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
+        (row, col) = (x, y)
+        #print('here')
+        self.occupancy_grid_map[row, col] = DYN_OBSTACLE_T2
+
+
+
 
     def remove_obstacle(self, pos: (int, int)):
         """
@@ -159,7 +174,7 @@ class OccupancyGridMap:
     #             if self.in_bounds((x, y)) and ((x - px) ** 2 + (y - py) ** 2 <= view_range ** 2)]
     #    return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
 
-    def local_observation(self, global_position: (int, int), view_range: int = 7) -> Dict:
+    def local_observation(self, global_position: (int, int), view_range: int = 7) -> Dict: #If we add a few types of dynamic obs, we will have to change this (Noam)
         (px, py) = global_position
         # saves all the coordinates in the circle range
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
@@ -181,7 +196,20 @@ class OccupancyGridMap:
                 count += 1
         return count
 
-    def minimal_distance_local_observation(self, global_position: (int, int), view_range: int = 7):
+    def count_dynamic_obstacles_local_observation(self, global_position: (int, int), view_range: int = 7):
+        (px, py) = global_position
+        nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
+                 for y in range(py - view_range - 1, py + view_range + 1)
+                 if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
+        # help prints (Dana)
+        count = 0
+        for node in nodes:
+            if self.occupancy_grid_map[node] == DYN_OBSTACLE or self.occupancy_grid_map[node] == DYN_OBSTACLE_T2:
+                count += 1
+            print(count)
+        return count
+
+    def minimal_distance_local_observation(self, global_position: (int, int), view_range: int = 7): #from static obstacles (Noam)
         (px, py) = global_position
         print(global_position)
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
@@ -301,6 +329,10 @@ class SLAM:
                                                                     view_range=self.view_range)
         num_obstacles = self.ground_truth_map.count_obstacles_local_observation(global_position=global_position,
                                                                                 view_range=self.view_range)
+
+        num_dynamic_obstacles = self.ground_truth_map.count_dynamic_obstacles_local_observation(global_position=global_position,
+                                                                               view_range=self.view_range)
+        print("dynamic are " ,num_dynamic_obstacles)
         #print(num_obstacles)
         min_distance = self.ground_truth_map.minimal_distance_local_observation(global_position=global_position,
                                                                                 view_range=self.view_range)
@@ -310,7 +342,7 @@ class SLAM:
         #print("average distance:", average_distance, min_distance)
         largest_angle = self.ground_truth_map.largest_angle_local_observation(global_position=global_position,
                                                                               view_range=self.view_range)
-        status = (num_obstacles, min_distance, average_distance, largest_angle)
+        status = (num_obstacles, num_dynamic_obstacles, min_distance, average_distance, largest_angle)
         self.vector.append(status)
         #print("vector: ", self.vector)
         vertices = self.update_changed_edge_costs(local_grid=local_observation)
@@ -337,6 +369,15 @@ class SLAM:
                         v.add_edge_with_cost(succ=u, cost=self.c(u, v.pos))
                     vertices.add_vertex(v)
                     self.slam_map.set_dynamic_obstacle(node)
+
+            elif value == DYN_OBSTACLE_T2:
+                if self.slam_map.is_unoccupied(node):
+                    v = Vertex(pos=node)
+                    succ = self.slam_map.succ(node)
+                    for u in succ:
+                        v.add_edge_with_cost(succ=u, cost=self.c(u, v.pos))
+                    vertices.add_vertex(v)
+                    self.slam_map.set_dynamic_obstacle_t2(node)
 
             else:
                 # if white cell
