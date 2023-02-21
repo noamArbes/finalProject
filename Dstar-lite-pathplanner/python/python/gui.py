@@ -135,10 +135,10 @@ class Animation:
         if path is None:
             path = []
 
-    # automatic (Dana)
-        #if path:
-        #    (x, y) = path[1]
-        #    self.set_position((x, y))
+    #automatic (Dana)
+    #  #if path:
+    #  #    (x, y) = path[1]
+    #  #    self.set_position((x, y))
 
         grid_cell = None
 

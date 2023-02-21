@@ -181,7 +181,7 @@ class OccupancyGridMap:
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
         # we need to understand how to check if dynamic or static (Dana)
-        return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else DYN_OBSTACLE for node in nodes}
+        return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
 
     def count_obstacles_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
@@ -192,7 +192,7 @@ class OccupancyGridMap:
         # help prints (Dana)
         count = 0
         for node in nodes:
-            if not self.is_unoccupied(pos=node):
+            if self.occupancy_grid_map[node] == OBSTACLE:
                 count += 1
         return count
 
@@ -206,7 +206,6 @@ class OccupancyGridMap:
         for node in nodes:
             if self.occupancy_grid_map[node] == DYN_OBSTACLE or self.occupancy_grid_map[node] == DYN_OBSTACLE_T2:
                 count += 1
-            print(count)
         return count
 
     def minimal_distance_local_observation(self, global_position: (int, int), view_range: int = 7): #from static obstacles (Noam)
