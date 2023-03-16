@@ -99,7 +99,6 @@ class DStarLite:
                     self.update_vertex(u)
 
     def rescan(self) -> Vertices:
-
         new_edges_and_old_costs = self.new_edges_and_old_costs
         self.new_edges_and_old_costs = None
         return new_edges_and_old_costs
@@ -132,7 +131,6 @@ class DStarLite:
             if changed_edges_with_old_cost:
                 self.k_m += heuristic(self.s_last, self.s_start)
                 self.s_last = self.s_start
-
                 # for all directed edges (u,v) with changed edge costs
                 vertices = changed_edges_with_old_cost.vertices
                 for vertex in vertices:

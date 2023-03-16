@@ -378,23 +378,23 @@ class SLAM:
                     vertices.add_vertex(v)
                     self.slam_map.set_obstacle(node)
 
-            if value == DYN_OBSTACLE:
-                if self.slam_map.is_unoccupied(node):
-                    v = Vertex(pos=node)
-                    succ = self.slam_map.succ(node)
-                    for u in succ:
-                        v.add_edge_with_cost(succ=u, cost=self.c(u, v.pos))
-                    vertices.add_vertex(v)
-                    self.slam_map.set_dynamic_obstacle(node)
+ #         if value == DYN_OBSTACLE:
+ #             if self.slam_map.is_unoccupied(node):
+ #                 v = Vertex(pos=node)
+ #                 succ = self.slam_map.succ(node)
+ #                 for u in succ:
+ #                     v.add_edge_with_cost(succ=u, cost=self.c(u, v.pos))
+ #                 vertices.add_vertex(v)
+ #                 self.slam_map.set_dynamic_obstacle(node)
 
-            elif value == DYN_OBSTACLE_T2:
-                if self.slam_map.is_unoccupied(node):
-                    v = Vertex(pos=node)
-                    succ = self.slam_map.succ(node)
-                    for u in succ:
-                        v.add_edge_with_cost(succ=u, cost=self.c(u, v.pos))
-                    vertices.add_vertex(v)
-                    self.slam_map.set_dynamic_obstacle_t2(node)
+ #         elif value == DYN_OBSTACLE_T2:
+ #             if self.slam_map.is_unoccupied(node):
+ #                 v = Vertex(pos=node)
+ #                 succ = self.slam_map.succ(node)
+ #                 for u in succ:
+ #                     v.add_edge_with_cost(succ=u, cost=self.c(u, v.pos))
+ #                 vertices.add_vertex(v)
+ #                 self.slam_map.set_dynamic_obstacle_t2(node)
 
             else:
                 # if white cell
