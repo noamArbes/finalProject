@@ -8,8 +8,9 @@ from typing import List
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)  # BLACK
 UNOCCUPIED = (255, 255, 255)  # WHITE
+GOAL_A = (0, 0, 255)  # BLUE
 GOAL_B = (0, 255, 0)  # GREEN
-GOAL_C = (255, 165, 0)  # ORANGE (can be blue instead Noam)
+GOAL_C = (255, 165, 0)  # ORANGE ( Noam)
 START = (255, 0, 0)  # RED
 GRAY1 = (145, 145, 102)  # GRAY1
 OBSTACLE = (77, 77, 51)  # GRAY2
@@ -26,6 +27,7 @@ colors = {
     0: UNOCCUPIED,
     1: GOAL_B,
     2: GOAL_C,
+    3: GOAL_A,
     255: OBSTACLE,
     100: DYN_OBSTACLE,
     150: DYN_OBSTACLE_T2
@@ -43,8 +45,9 @@ class Animation:
                  start=(0, 0),
                  goalB=(50, 50),
                  goalC=(51, 51),
+                 goalA=(52, 52),
                  viewing_range=3,
-
+                 counter_runs=4
 
                  ):
 
@@ -58,6 +61,8 @@ class Animation:
         self.observation = {"pos": None, "type": None}
         self.goalB = goalB
         self.goalC = goalC
+        self.goalA = goalA
+        self.counter_runs = counter_runs
         self.viewing_range = viewing_range
         self.clock = pygame.time.Clock()
         self.total_time = 0
@@ -109,6 +114,13 @@ class Animation:
 
     def set_goalB(self, goalB: (int, int)):
         self.goalB = goalB
+
+    def get_goalA(self):
+            return self.goalA
+
+    def set_goalA(self, goalA: (int, int)):
+        self.goalA = goalA
+
 
     def get_goalC(self):
         return self.goalC
@@ -169,7 +181,7 @@ class Animation:
 
 
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
-                print("backspace automates the press space")
+                #print("backspace automates the press space")
                 if not self.cont:
                     self.cont = True
                 else:
@@ -209,7 +221,7 @@ class Animation:
 
                 # set the location in the grid map
                 if not self.world.is_unoccupied(grid_cell):
-                    print("grid cell: ".format(grid_cell))
+                    #print("grid cell: ".format(grid_cell))
                     self.world.remove_obstacle(grid_cell)
                     self.observation = {"pos": grid_cell, "type": UNOCCUPIED}
 
@@ -277,6 +289,11 @@ class Animation:
         # fill in the goalC cell with orange (Noam)
         pygame.draw.rect(self.screen, GOAL_C, [(self.margin + self.width) * self.goalC[1] + self.margin,
                                                (self.margin + self.height) * self.goalC[0] + self.margin,
+                                               self.width,
+                                               self.height])
+        # fill in the goalA cell with blue (Noam)
+        pygame.draw.rect(self.screen, GOAL_A, [(self.margin + self.width) * self.goalA[1] + self.margin,
+                                               (self.margin + self.height) * self.goalA[0] + self.margin,
                                                self.width,
                                                self.height])
         # draw a moving robot, based on current coordinates

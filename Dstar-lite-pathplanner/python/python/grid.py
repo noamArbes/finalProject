@@ -140,7 +140,7 @@ class OccupancyGridMap:
         (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
         (row, col) = (x, y)
         self.occupancy_grid_map[row, col] = OBSTACLE
-        print('hi')
+        #print('hi')
 
     def set_dynamic_obstacle(self, pos: (int, int)):
         """
@@ -202,7 +202,7 @@ class OccupancyGridMap:
 
     def count_obstacles_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
-        print(global_position)
+        #print(global_position)
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
@@ -228,7 +228,7 @@ class OccupancyGridMap:
 
     def minimal_distance_local_observation(self, global_position: (int, int), view_range: int = 7): #from static obstacles (Noam)
         (px, py) = global_position
-        print(global_position)
+        #print(global_position)
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
@@ -244,7 +244,7 @@ class OccupancyGridMap:
 
     def average_distance_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
-        print(global_position)
+        #print(global_position)
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
@@ -257,7 +257,7 @@ class OccupancyGridMap:
             for j in range(i + 1, len(obstacles)):
                 # calculate the distance between the current pair of obstacles
                 distance = math.dist(obstacles[i], obstacles[j])
-                print("dist", distance)
+                #print("dist", distance)
                 total_distance += distance
         num_obstacles = len(obstacles)
         if num_obstacles > 1:
@@ -267,7 +267,7 @@ class OccupancyGridMap:
 
     def largest_angle_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
-        print(global_position)
+        #print(global_position)
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
@@ -349,7 +349,7 @@ class SLAM:
 
         num_dynamic_obstacles = self.ground_truth_map.count_dynamic_obstacles_local_observation(global_position=global_position,
                                                                                view_range=self.view_range)
-        print("dynamic are " ,num_dynamic_obstacles)
+        #print("dynamic are " ,num_dynamic_obstacles)
         #print(num_obstacles)
         min_distance = self.ground_truth_map.minimal_distance_local_observation(global_position=global_position,
                                                                                 view_range=self.view_range)
