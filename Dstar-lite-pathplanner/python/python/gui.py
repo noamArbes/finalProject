@@ -8,7 +8,8 @@ from typing import List
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)  # BLACK
 UNOCCUPIED = (255, 255, 255)  # WHITE
-GOAL = (0, 255, 0)  # GREEN
+GOAL_B = (0, 255, 0)  # GREEN
+GOAL_C = (255, 165, 0)  # ORANGE (can be blue instead Noam)
 START = (255, 0, 0)  # RED
 GRAY1 = (145, 145, 102)  # GRAY1
 OBSTACLE = (77, 77, 51)  # GRAY2
@@ -23,7 +24,8 @@ total_time = 0
 
 colors = {
     0: UNOCCUPIED,
-    1: GOAL,
+    1: GOAL_B,
+    2: GOAL_C,
     255: OBSTACLE,
     100: DYN_OBSTACLE,
     150: DYN_OBSTACLE_T2
@@ -39,7 +41,8 @@ class Animation:
                  x_dim=100,
                  y_dim=50,
                  start=(0, 0),
-                 goal=(50, 50),
+                 goalB=(50, 50),
+                 goalC=(51, 51),
                  viewing_range=3,
 
 
@@ -53,7 +56,8 @@ class Animation:
         self.start = start
         self.current = start
         self.observation = {"pos": None, "type": None}
-        self.goal = goal
+        self.goalB = goalB
+        self.goalC = goalC
         self.viewing_range = viewing_range
         self.clock = pygame.time.Clock()
         self.total_time = 0
@@ -100,11 +104,17 @@ class Animation:
     def set_position(self, pos: (int, int)):
         self.current = pos
 
-    def get_goal(self):
-        return self.goal
+    def get_goalB(self):
+            return self.goalB
 
-    def set_goal(self, goal: (int, int)):
-        self.goal = goal
+    def set_goalB(self, goalB: (int, int)):
+        self.goalB = goalB
+
+    def get_goalC(self):
+        return self.goalC
+
+    def set_goalC(self, goalC: (int, int)):
+        self.goalC = goalC
 
     def set_start(self, start: (int, int)):
         self.start = start
@@ -259,12 +269,16 @@ class Animation:
 
         self.display_path(path=path)  # if we disable this the path will disappear (Dana)
 
-        # fill in the goal cell with green
-        pygame.draw.rect(self.screen, GOAL, [(self.margin + self.width) * self.goal[1] + self.margin,
-                                             (self.margin + self.height) * self.goal[0] + self.margin,
-                                             self.width,
-                                             self.height])
-
+        # fill in the goalB cell with green
+        pygame.draw.rect(self.screen, GOAL_B, [(self.margin + self.width) * self.goalB[1] + self.margin,
+                                               (self.margin + self.height) * self.goalB[0] + self.margin,
+                                               self.width,
+                                               self.height])
+        # fill in the goalC cell with orange (Noam)
+        pygame.draw.rect(self.screen, GOAL_C, [(self.margin + self.width) * self.goalC[1] + self.margin,
+                                               (self.margin + self.height) * self.goalC[0] + self.margin,
+                                               self.width,
+                                               self.height])
         # draw a moving robot, based on current coordinates
         robot_center = [round(self.current[1] * (self.width + self.margin) + self.width / 2) + self.margin,
                         round(

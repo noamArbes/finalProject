@@ -34,11 +34,28 @@ class OccupancyGridMap:
 
         # the obstacle map
         self.occupancy_grid_map = np.zeros(self.map_extents, dtype=np.uint8)
-        # we can define here all the static obstacles (Noam)
-        self.occupancy_grid_map[50, 50] = OBSTACLE
-        self.occupancy_grid_map[7, 8] = OBSTACLE
+
         #d = self.set_dynamic_obstacle(20,20)
         # we can define here all the dynamic obstacles (Noam)
+        # upper wall of the room
+        for i in range(11, 94):
+            self.occupancy_grid_map[7, i] = OBSTACLE
+        # bottom wall of the room
+        for i in range(10, 95):
+            self.occupancy_grid_map[64, i] = OBSTACLE
+        # left wall of the room
+        for i in range(7, 65):
+            self.occupancy_grid_map[i, 10] = OBSTACLE
+        # right wall of the room
+        for i in range(7, 65):
+            self.occupancy_grid_map[i, 94] = OBSTACLE
+        # middle left wall of the room
+        for i in range(10, 35):
+            self.occupancy_grid_map[43, i] = OBSTACLE
+        # middle right wall of the room
+        for i in range(70, 95):
+            self.occupancy_grid_map[43, i] = OBSTACLE
+
         self.occupancy_grid_map[40, 40] = DYN_OBSTACLE
         self.occupancy_grid_map[20, 20] = DYN_OBSTACLE_T2
         self.occupancy_grid_map[45, 0] = DYN_OBSTACLE_T2
@@ -192,6 +209,7 @@ class OccupancyGridMap:
         # help prints (Dana)
         count = 0
         for node in nodes:
+            #or in Dana changes:  if self.occupancy_grid_map[node] == OBSTACLE:
             if self.occupancy_grid_map[node] == OBSTACLE:
                 count += 1
         return count
