@@ -1,6 +1,5 @@
 from gui import Animation
 from d_star_lite import DStarLite
-from d_star_lite_c import DStarLite_C
 from grid import OccupancyGridMap, SLAM
 from Dynamic import dynamic_obs
 import pandas as pd
@@ -82,7 +81,7 @@ if __name__ == '__main__':
 
     dstar4 = DStarLite(map=new_map,
                      s_start=startDyn,
-                     s_goal=goalDyn) #Noam
+                     s_goal=goalDyn)
 
     # SLAM to detect vertices
     slam = SLAM(map=new_map,
@@ -90,36 +89,31 @@ if __name__ == '__main__':
 
 
 
-    while counter_runs < 3:
-        if gui.done == True: #we should check if to take this condition out of the while loops (Noam)
-            counter_runs = 5
+    while counter_runs < 3 and gui.done == False:
+        if gui.done == True:
             pygame.quit()
         # move and compute path to the first path (Noam)
         path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
         path_obstacle, g, rhs = dstar4.move_and_replan_dyn(obstacle_position=new_position_dyn)
 
         # first navigation to goalB (Noam)
-        while  global_var.arrivedA == True and  global_var.arrivedB1 == False and global_var.arrivedB2 == False and \
+        while  global_var.arrivedA == True and global_var.arrivedB1 == False and global_var.arrivedB2 == False and \
                 global_var.arrivedC == False and gui.done == False:
-            # update the map
-            # print(path)
-            # drive gui
-            gui.run_game(path_robot=path, path_obstacle=path_obstacle) #Noam
+
+            path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
+            gui.run_game(path_robot=path, path_obstacle=path_obstacle)
+
             new_position = gui.current
-            new_position_dyn= gui.currentDyn
             new_observation = gui.observation
             new_map = gui.world
+
+            #Dynamic obs movement
+            new_position_dyn= gui.currentDyn
             path_obstacle, g, rhs = dstar4.move_and_replan_dyn(obstacle_position=new_position_dyn)
-            """
-            if new_observation is not None:
-                if new_observation["type"] == OBSTACLE:
-                    dstar.global_map.set_obstacle(pos=new_observation["pos"])
-                if new_observation["pos"] == UNOCCUPIED:
-                    dstar.global_map.remove_obstacle(pos=new_observation["pos"])
-            """
-            if new_position_dyn == goalDyn:
-                counter_runs =5
-            if new_position == goalB:  # added to prevent error at the end (Dana)
+            if new_position_dyn == gui.goalDyn:
+                path_obstacle =[]
+
+            if new_position == goalB:
                 global_var.arrivedB1 = True
                 global_var.arrivedB2 = False
                 global_var.arrivedA = False
@@ -134,31 +128,30 @@ if __name__ == '__main__':
                 new_edges_and_old_costs, slam_map = slam.rescan(global_position=new_position)
                 dstar1.new_edges_and_old_costs = new_edges_and_old_costs
                 dstar1.sensed_map = slam_map
-                path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
 
-                # print("Session time: " + str(gui.total_time / 1000) + " seconds")  # converts time to seconds
-                # print(slam.vector)
         #navigation to goalC (Noam)
         while global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == False\
                 and global_var.arrivedC == False and gui.done == False:
-            # update the map
-            # print(path)
-            # drive gui
+
+            path, g, rhs = dstar2.move_and_replan(robot_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_obstacle)
-            #dyn.set_dynamic(30, 30)
+
             new_position = gui.current
             new_observation = gui.observation
             new_map = gui.world
-            if new_position == goalC:  # added to prevent error at the end (Dana)
+
+            #Dynamic obs movement
+            new_position_dyn= gui.currentDyn
+            path_obstacle, g, rhs = dstar4.move_and_replan_dyn(obstacle_position=new_position_dyn)
+            if new_position_dyn == gui.goalDyn:
+                path_obstacle =[]
+
+            if new_position == goalC:
                 global_var.arrivedB1 = True
                 global_var.arrivedB2 = False
                 global_var.arrivedA = False
                 global_var.arrivedC = True
-            #gui.done = True
             # d star
-            # if we arrived to goalB, start navigating to goalC. In the meanwhile it stops the simulation after arriving to goalB.
-            path, g, rhs = dstar2.move_and_replan(robot_position=new_position)
-
             if new_observation is not None:
                 old_map = new_map
                 slam.set_ground_truth_map(gt_map=new_map)
@@ -168,31 +161,31 @@ if __name__ == '__main__':
                 new_edges_and_old_costs, slam_map = slam.rescan(global_position=new_position)
                 dstar2.new_edges_and_old_costs = new_edges_and_old_costs
                 dstar2.sensed_map = slam_map
-                # d star (Check if we need to duplicate for dstar2, Noam)
-                path, g, rhs = dstar2.move_and_replan(robot_position=new_position)
-             # print("Session time: " + str(gui.total_time / 1000) + " seconds")  # converts time to seconds
-             # print(slam.vector)
+
         #navigate to goalB the second time (Noam)
         while global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == False \
                 and global_var.arrivedC == True and gui.done == False:
-            # update the map
-            # print(path)
-            # drive gui
+
+            path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_obstacle)
-            # dyn.set_dynamic(30, 30)
+
             new_position = gui.current
             new_observation = gui.observation
             new_map = gui.world
 
-            if new_position == goalB:  # added to prevent error at the end (Dana)
+            #Dynamic obs movement
+            new_position_dyn = gui.currentDyn
+            path_obstacle, g, rhs = dstar4.move_and_replan_dyn(obstacle_position=new_position_dyn)
+            if new_position_dyn == gui.goalDyn:
+                path_obstacle = []
+
+            if new_position == goalB:
                 global_var.arrivedB1 = True
                 global_var.arrivedB2 = True
                 global_var.arrivedA = False
                 global_var.arrivedC = True
-            # gui.done = True
-            # d star
-            path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
 
+            # d star
             if new_observation is not None:
                 old_map = new_map
                 slam.set_ground_truth_map(gt_map=new_map)
@@ -200,35 +193,32 @@ if __name__ == '__main__':
             if new_position != last_position:
                 last_position = new_position
                 new_edges_and_old_costs, slam_map = slam.rescan(global_position=new_position)
-                dstar3.new_edges_and_old_costs = new_edges_and_old_costs
-                dstar3.sensed_map = slam_map
-                # d star (Check if we need to duplicate for dstar2, Noam)
-                path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
-            # print("Session time: " + str(gui.total_time / 1000) + " seconds")  # converts time to seconds
-            # print(slam.vector)
+                dstar1.new_edges_and_old_costs = new_edges_and_old_costs
+                dstar1.sensed_map = slam_map
 
         #navigate back to goalA(Noam)
         while global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == True \
                 and global_var.arrivedC == True and gui.done == False:
-            # update the map
+
+            path, g, rhs = dstar3.move_and_replan(robot_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_obstacle)
-            # dyn.set_dynamic(30, 30)
+
             new_position = gui.current
             new_observation = gui.observation
             new_map = gui.world
 
-            if new_position == goalA:  # added to prevent error at the end (Dana)
+            #Dynamic obs movement
+            new_position_dyn = gui.currentDyn
+            path_obstacle, g, rhs = dstar4.move_and_replan_dyn(obstacle_position=new_position_dyn)
+            if new_position_dyn == gui.goalDyn:
+                path_obstacle = []
+
+            if new_position == goalA:
                 global_var.arrivedA = True
                 global_var.arrivedB1 = False
                 global_var.arrivedB2 = False
                 global_var.arrivedC = False
                 counter_runs = counter_runs + 1
-            path, g, rhs = dstar3.move_and_replan(robot_position=new_position)
-#            print(counter_runs)
-#            print("arrivedB1", global_var.arrivedB1)
-#            print("arrivedB2", global_var.arrivedB2)
-#            print("arrivedA", global_var.arrivedA)
-#            print("arrivedC", global_var.arrivedC)
 
             if new_observation is not None:
                 old_map = new_map
@@ -239,10 +229,6 @@ if __name__ == '__main__':
                 new_edges_and_old_costs, slam_map = slam.rescan(global_position=new_position)
                 dstar3.new_edges_and_old_costs = new_edges_and_old_costs
                 dstar3.sensed_map = slam_map
-                # d star (Check if we need to duplicate for dstar2, Noam)
-                path, g, rhs = dstar3.move_and_replan(robot_position=new_position)
-            # print("Session time: " + str(gui.total_time / 1000) + " seconds")  # converts time to seconds
-            # print(slam.vector)
     
 # export csv file (Dana)
     with open('slam.vector.csv', 'w', newline='') as csvfile:

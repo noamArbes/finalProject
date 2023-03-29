@@ -178,12 +178,19 @@ class Animation:
     def run_game(self, path_robot=None, path_obstacle=None):
         self.total_time += clock.tick(10) #Speed of the simulation (Noam)
         if path_robot is None:
-            path = []
+            path_robot = []
+        if path_obstacle is None:
+            path_obstacle = []
 
     #automatic (Dana)
-        if path_obstacle:
-            (x, y) = path_obstacle[1]
-            self.set_positionDyn((x, y))
+        if path_robot:
+            (x, y) = path_robot[1]
+            self.set_position((x, y))
+
+        if self.get_positionDyn() != self.goalDyn:
+            if path_obstacle:
+                (x, y) = path_obstacle[1]
+                self.set_positionDyn((x, y))
 
         grid_cell = None
         for event in pygame.event.get():
