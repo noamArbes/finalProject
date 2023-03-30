@@ -46,41 +46,41 @@ class OccupancyGridMap:
             self.occupancy_grid_map[8, i] = OBSTACLE_Z1
             self.occupancy_grid_map[9, i] = OBSTACLE_Z2
 
-
-        # bottom wall of the room
+            # bottom wall of the room
         for i in range(10, 95):
             self.occupancy_grid_map[64, i] = OBSTACLE
             self.occupancy_grid_map[63, i] = OBSTACLE_Z1
             self.occupancy_grid_map[62, i] = OBSTACLE_Z2
 
-
-
-        # left wall of the room
+            # left wall of the room
         for i in range(7, 65):
             self.occupancy_grid_map[i, 10] = OBSTACLE
+        for i in range(8, 64):
+            self.occupancy_grid_map[i, 11] = OBSTACLE_Z1
+            self.occupancy_grid_map[i, 12] = OBSTACLE_Z2
 
-
-
-
-        # right wall of the room
+            # right wall of the room
         for i in range(7, 65):
             self.occupancy_grid_map[i, 94] = OBSTACLE
+        for i in range(8, 64):
+            self.occupancy_grid_map[i, 93] = OBSTACLE_Z1
+            self.occupancy_grid_map[i, 92] = OBSTACLE_Z2
 
-
-        # middle left wall of the room
+            # middle left wall of the room
         for i in range(10, 35):
             self.occupancy_grid_map[43, i] = OBSTACLE
-            self.occupancy_grid_map[42, i] = OBSTACLE_Z1
-            self.occupancy_grid_map[41, i] = OBSTACLE_Z2
-            self.occupancy_grid_map[44, i] = OBSTACLE_Z1
-            self.occupancy_grid_map[45, i] = OBSTACLE_Z2
+            self.occupancy_grid_map[42, i + 1] = OBSTACLE_Z1
+            self.occupancy_grid_map[41, i + 1] = OBSTACLE_Z2
+            self.occupancy_grid_map[44, i + 1] = OBSTACLE_Z1
+            self.occupancy_grid_map[45, i + 1] = OBSTACLE_Z2
 
-
-
-        # middle right wall of the room
+            # middle right wall of the room
         for i in range(70, 95):
             self.occupancy_grid_map[43, i] = OBSTACLE
-
+            self.occupancy_grid_map[42, i - 1] = OBSTACLE_Z1
+            self.occupancy_grid_map[41, i - 1] = OBSTACLE_Z2
+            self.occupancy_grid_map[44, i - 1] = OBSTACLE_Z1
+            self.occupancy_grid_map[45, i - 1] = OBSTACLE_Z2
 
         #self.occupancy_grid_map[40, 40] = DYN_OBSTACLE
         #self.occupancy_grid_map[20, 20] = DYN_OBSTACLE_T2
