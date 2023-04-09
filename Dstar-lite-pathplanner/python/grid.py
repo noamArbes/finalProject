@@ -9,6 +9,7 @@ import pygame
 import global_var
 
 OBSTACLE = 255
+WALL = 200
 OBSTACLE_Z1 = 80
 OBSTACLE_Z2 = 20
 DYN_OBSTACLE = 100
@@ -42,33 +43,33 @@ class OccupancyGridMap:
         # we can define here all the dynamic obstacles (Noam)
         # upper wall of the room
         for i in range(11, 94):
-            self.occupancy_grid_map[7, i] = OBSTACLE
+            self.occupancy_grid_map[7, i] = WALL
             self.occupancy_grid_map[8, i] = OBSTACLE_Z1
             self.occupancy_grid_map[9, i] = OBSTACLE_Z2
 
             # bottom wall of the room
         for i in range(10, 95):
-            self.occupancy_grid_map[64, i] = OBSTACLE
+            self.occupancy_grid_map[64, i] = WALL
             self.occupancy_grid_map[63, i] = OBSTACLE_Z1
             self.occupancy_grid_map[62, i] = OBSTACLE_Z2
 
             # left wall of the room
         for i in range(7, 65):
-            self.occupancy_grid_map[i, 10] = OBSTACLE
+            self.occupancy_grid_map[i, 10] = WALL
         for i in range(8, 64):
             self.occupancy_grid_map[i, 11] = OBSTACLE_Z1
             self.occupancy_grid_map[i, 12] = OBSTACLE_Z2
 
             # right wall of the room
         for i in range(7, 65):
-            self.occupancy_grid_map[i, 94] = OBSTACLE
+            self.occupancy_grid_map[i, 94] = WALL
         for i in range(8, 64):
             self.occupancy_grid_map[i, 93] = OBSTACLE_Z1
             self.occupancy_grid_map[i, 92] = OBSTACLE_Z2
 
             # middle left wall of the room
         for i in range(10, 35):
-            self.occupancy_grid_map[43, i] = OBSTACLE
+            self.occupancy_grid_map[43, i] = WALL
             self.occupancy_grid_map[42, i + 1] = OBSTACLE_Z1
             self.occupancy_grid_map[41, i + 1] = OBSTACLE_Z2
             self.occupancy_grid_map[44, i + 1] = OBSTACLE_Z1
@@ -76,15 +77,24 @@ class OccupancyGridMap:
 
             # middle right wall of the room
         for i in range(70, 95):
-            self.occupancy_grid_map[43, i] = OBSTACLE
+            self.occupancy_grid_map[43, i] = WALL
             self.occupancy_grid_map[42, i - 1] = OBSTACLE_Z1
             self.occupancy_grid_map[41, i - 1] = OBSTACLE_Z2
             self.occupancy_grid_map[44, i - 1] = OBSTACLE_Z1
             self.occupancy_grid_map[45, i - 1] = OBSTACLE_Z2
 
-        #self.occupancy_grid_map[40, 40] = DYN_OBSTACLE
-        #self.occupancy_grid_map[20, 20] = DYN_OBSTACLE_T2
-        #self.occupancy_grid_map[45, 0] = DYN_OBSTACLE_T2
+        for i in range(75, 90):
+            self.occupancy_grid_map[44, i] = WALL
+            self.occupancy_grid_map[45, i] = WALL
+
+        for i in range(75, 90):
+            self.occupancy_grid_map[45, i] = WALL
+            self.occupancy_grid_map[44, i] = WALL
+
+        for i in range(75, 90):
+            self.occupancy_grid_map[45, i] = WALL
+            self.occupancy_grid_map[44, i] = WALL
+
 
         # obstacles
         self.visited = {}
@@ -116,7 +126,22 @@ class OccupancyGridMap:
         # if not self.in_bounds(cell=(x, y)):
         #    raise IndexError("Map index out of bounds")
 
+
         return self.occupancy_grid_map[row][col] == UNOCCUPIED
+
+    def is_static_obs(self, pos: (int, int)) -> bool:
+        """
+        :param pos: cell position we wish to check
+        :return: True if cell is occupied with obstacle, False else
+        """
+        (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
+        (row, col) = (x, y)
+
+        is_unoccupied = True
+        if self.occupancy_grid_map[row][col] == 255 or self.occupancy_grid_map[row][col] == 100:
+            is_unoccupied = False
+        return is_unoccupied
+
 
     def in_bounds(self, cell: (int, int)) -> bool:
         """
@@ -166,31 +191,15 @@ class OccupancyGridMap:
         (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
         (row, col) = (x, y)
         self.occupancy_grid_map[row, col] = OBSTACLE
-        #print('hi')
 
-#    def set_dynamic_obstacle(self, pos: (int, int)): #remember to remove the next 2 function if not used (Noam)
-#        """
-#        :param pos: cell position we wish to set obstacle
-#        :return: None
-#        """
-#        (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
-#        (row, col) = (x, y)
-#        #  print('here')
-#        self.occupancy_grid_map[row, col] = DYN_OBSTACLE
-
- #   def set_dynamic_obstacle_t2(self, pos: (int, int)):
- #       """
- #       :param pos: cell position we wish to set obstacle
- #       :return: None
- #       """
- #       (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
- #       (row, col) = (x, y)
- #       # print('here')
-#
- #       self.occupancy_grid_map[row, col] = DYN_OBSTACLE_T2
-
-
-
+    def set_dynamic_obstacle(self, pos: (int, int)):
+        """
+        :param pos: cell position we wish to set obstacle
+        :return: None
+        """
+        (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
+        (row, col) = (x, y)
+        self.occupancy_grid_map[row, col] = DYN_OBSTACLE
 
     def remove_obstacle(self, pos: (int, int)):
         """
@@ -201,42 +210,23 @@ class OccupancyGridMap:
         (row, col) = (x, y)
         self.occupancy_grid_map[row, col] = UNOCCUPIED
 
-    # def local_observation(self, global_position: (int, int), view_range: int = 7) -> Dict:
-    #    #This is the function we should change, according to the change of the radius around the robot(that is in gui)
-    #    """
-    #    :param global_position: position of robot in the global map frame
-    #    :param view_range: how far ahead we should look
-    #    :return: dictionary of new observations
-    #    """
-    #    (px, py) = global_position
-    #    print(global_position)
-    #    #nodes = [(x, y) for x in range(px - view_range, px + view_range + 1)
-    #    #         for y in range(py - view_range, py + view_range + 1)
-    #    #         if self.in_bounds((x, y))]
-    #    nodes = [(x, y) for x in range(px - view_range, px + view_range + 1)
-    #             for y in range(py - view_range, py + view_range + 1)
-    #             if self.in_bounds((x, y)) and ((x - px) ** 2 + (y - py) ** 2 <= view_range ** 2)]
-    #    return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
 
-    def local_observation(self, global_position: (int, int), view_range: int = 7) -> Dict: #If we add a few types of dynamic obs, we will have to change this (Noam)
+    def local_observation(self, global_position: (int, int), view_range: int = 7) -> Dict:
         (px, py) = global_position
         # saves all the coordinates in the circle range
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
-        # we need to understand how to check if dynamic or static (Dana)
+        # we need check if we need to understand how to check if dynamic or static (Dana)
         return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
 
     def count_obstacles_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
-        #print(global_position)
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
-        # help prints (Dana)
         count = 0
         for node in nodes:
-            #or in Dana changes:  if self.occupancy_grid_map[node] == OBSTACLE:
             if self.occupancy_grid_map[node] == OBSTACLE:
                 count += 1
         return count
@@ -249,13 +239,12 @@ class OccupancyGridMap:
         # help prints (Dana)
         count = 0
         for node in nodes:
-            if self.occupancy_grid_map[node] == DYN_OBSTACLE or self.occupancy_grid_map[node] == DYN_OBSTACLE_T2:
+            if self.occupancy_grid_map[node] == DYN_OBSTACLE:
                 count += 1
         return count
 
-    def minimal_distance_local_observation(self, global_position: (int, int), view_range: int = 7): #from static obstacles (Noam)
+    def minimal_distance_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
-        #print(global_position)
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
@@ -271,7 +260,6 @@ class OccupancyGridMap:
 
     def average_distance_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
-        #print(global_position)
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
@@ -284,7 +272,6 @@ class OccupancyGridMap:
             for j in range(i + 1, len(obstacles)):
                 # calculate the distance between the current pair of obstacles
                 distance = math.dist(obstacles[i], obstacles[j])
-                #print("dist", distance)
                 total_distance += distance
         num_obstacles = len(obstacles)
         if num_obstacles > 1:
@@ -294,7 +281,6 @@ class OccupancyGridMap:
 
     def largest_angle_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
-        #print(global_position)
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
@@ -325,27 +311,21 @@ class OccupancyGridMap:
             return (360 - largest_free_angle)
         return largest_free_angle
 
-
-
-
-# import math
-
-# def local_observation(self, global_position: (int, int), view_range: int = 70) -> Dict:
-# This function cuts out the nodes that are out of the range of 70, but it causes problems in the main
-#   """
-#  :param global_position: position of robot in the global map frame
-# :param view_range: how far ahead we should look
-#:return: dictionary of new observations
-# """
-# (px, py) = global_position
-# nodes = [(x, y) for x in range(px - view_range, px + view_range + 1)
-#        for y in range(py - view_range, py + view_range + 1)
-#       if self.in_bounds((x, y))]
-# nodes = [node for node in nodes if math.sqrt((node[0] - px) ** 2 + (node[1] - py) ** 2) <= view_range]
-# return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
-
-
-
+    def section_of_fail(self): #function to check where the robot fails (Noam)
+        if global_var.arrivedA == True and global_var.arrivedB1 == False and global_var.arrivedB2 == False and \
+                global_var.arrivedC == False:
+            return "A to B"
+        if global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == True \
+                and global_var.arrivedC == True:
+            return "B to A"
+        if global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == False\
+                and global_var.arrivedC == False:
+            return "B to C"
+        if global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == False \
+                and global_var.arrivedC == True:
+            return "C to B"
+        else:
+            return "Null"
 
 class SLAM:
     def __init__(self, map: OccupancyGridMap, view_range: int):
@@ -354,19 +334,7 @@ class SLAM:
                                          y_dim=map.y_dim)
         self.view_range = view_range
         self.vector = []
-    def section_of_fail(self, arrivedA, arrivedB1, arrivedB2, arrivedC): #function to check where the robot fails (Noam)
-        if  ((arrivedA == True and arrivedB1 == False and arrivedB2 == False and \
-                arrivedC == False) or (arrivedA == False and arrivedB1 == True and arrivedB2 == False \
-                and arrivedC == True)) and self.done == True:
-             return "section B"
-        if (arrivedA == False and arrivedB1 == True and arrivedB2 == True \
-                and arrivedC == True and self.done == True):
-            return "section A"
-        if arrivedA == False and arrivedB1 == True and arrivedB2 == False \
-        and arrivedC == False and self.done == True:
-           return "section C"
-        else:
-            return "Null"
+
 
     def set_ground_truth_map(self, gt_map: OccupancyGridMap):
         self.ground_truth_map = gt_map
@@ -383,28 +351,33 @@ class SLAM:
         else:
             return heuristic(u, v)
 
+    # We need to see if we should move this function to the second class (Dana)
     def rescan(self, global_position: (int, int)):
+        if self.vector==[]:
+            s = ('Number of static obstacles', 'Number of dynamic obstacles', 'Minimum distance from obstacle', 'Average distance from obstacles', 'Largest free angle', 'Section of fail')
+            self.vector.append(s)
 
         # rescan local area
         local_observation = self.ground_truth_map.local_observation(global_position=global_position,
                                                                     view_range=self.view_range)
+
         num_obstacles = self.ground_truth_map.count_obstacles_local_observation(global_position=global_position,
                                                                                 view_range=self.view_range)
 
         num_dynamic_obstacles = self.ground_truth_map.count_dynamic_obstacles_local_observation(global_position=global_position,
                                                                                view_range=self.view_range)
-        #print("dynamic are " ,num_dynamic_obstacles)
-        #print(num_obstacles)
+
         min_distance = self.ground_truth_map.minimal_distance_local_observation(global_position=global_position,
                                                                                 view_range=self.view_range)
-        #print("minimun distance:", min_distance)
+
         average_distance = self.ground_truth_map.average_distance_local_observation(global_position=global_position,
                                                                                     view_range=self.view_range)
-        #print("average distance:", average_distance, min_distance)
+
         largest_angle = self.ground_truth_map.largest_angle_local_observation(global_position=global_position,
                                                                               view_range=self.view_range)
 
-        status = (num_obstacles, num_dynamic_obstacles, min_distance, average_distance, largest_angle)
+        section_of_fail = self.ground_truth_map.section_of_fail()
+        status = (num_obstacles, num_dynamic_obstacles, min_distance, average_distance, largest_angle, section_of_fail)
         self.vector.append(status)
         #print("vector: ", self.vector)
         vertices = self.update_changed_edge_costs(local_grid=local_observation)

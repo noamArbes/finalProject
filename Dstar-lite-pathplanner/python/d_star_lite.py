@@ -6,10 +6,11 @@ from typing import Dict, List
 
 OBSTACLE = 255
 UNOCCUPIED = 0
+DYN_OBSTACLE = 100
 
 
 class DStarLite:
-    def __init__(self, map: OccupancyGridMap, s_start: (int, int), s_goal: (int, int)):
+    def __init__(self, map: OccupancyGridMap, s_start: (int, int), s_goal: (int, int), value):
         """
         :param map: the ground truth map of the environment provided by gui
         :param s_start: start location
@@ -156,13 +157,14 @@ class DStarLite:
         return path, self.g, self.rhs
 
     def move_and_replan_dyn(self, obstacle_position: (int, int)):
-        path_obstacle = [obstacle_position]  # starts in (10,10) (Dana)
+
+        path_obstacle = [obstacle_position]
         self.s_start = obstacle_position
         self.s_last = self.s_start
         self.compute_shortest_path()
 
-        while self.s_start != self.s_goal:
-            assert (self.rhs[self.s_start] != float('inf')), "There is no known path!"
+
+        while self.s_start != self.s_goal: # while the obstacle didn't reach the goal
 
             succ = self.sensed_map.succ(self.s_start, avoid_obstacles=False)
             min_s = float('inf')
@@ -205,5 +207,6 @@ class DStarLite:
                             self.update_vertex(u)
             self.compute_shortest_path()
         #print("path found!")
-        return path_obstacle, self.g, self.rhs
+        self.sensed_map.set_dynamic_obstacle(obstacle_position)
+        return path_obstacle
 
