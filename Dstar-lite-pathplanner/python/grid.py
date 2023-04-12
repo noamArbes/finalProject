@@ -402,6 +402,7 @@ class SLAM:
         #print("vector: ", self.vector)
         vertices = self.update_changed_edge_costs(local_grid=local_observation)
         return vertices, self.slam_map
+
     def update_changed_edge_costs(self, local_grid: Dict) -> Vertices:
         vertices = Vertices()
         for node, value in local_grid.items():
