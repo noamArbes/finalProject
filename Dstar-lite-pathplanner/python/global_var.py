@@ -6,3 +6,5 @@ global arrivedA
 arrivedA = False
 global arrivedC
 arrivedC = False
+global counter_runs
+counter_runs = 0

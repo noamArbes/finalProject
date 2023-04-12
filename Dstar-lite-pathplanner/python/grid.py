@@ -138,7 +138,20 @@ class OccupancyGridMap:
         (row, col) = (x, y)
 
         is_unoccupied = True
-        if self.occupancy_grid_map[row][col] == 255 or self.occupancy_grid_map[row][col] == 100:
+        if self.occupancy_grid_map[row][col] == 255:
+            is_unoccupied = False
+        return is_unoccupied
+
+    def is_dyn_obs(self, pos: (int, int)) -> bool:
+        """
+        :param pos: cell position we wish to check
+        :return: True if cell is occupied with obstacle, False else
+        """
+        (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
+        (row, col) = (x, y)
+
+        is_unoccupied = True
+        if self.occupancy_grid_map[row][col] == 100:
             is_unoccupied = False
         return is_unoccupied
 
@@ -210,7 +223,14 @@ class OccupancyGridMap:
         (row, col) = (x, y)
         self.occupancy_grid_map[row, col] = UNOCCUPIED
 
-
+    def find_zeros(self):
+        zeros = []
+        for x in range(10,60):
+            for y in range(13,60):
+                pos = (x, y)
+                if self.is_unoccupied(pos=pos):
+                    zeros.append((x, y))
+        return zeros
     def local_observation(self, global_position: (int, int), view_range: int = 7) -> Dict:
         (px, py) = global_position
         # saves all the coordinates in the circle range
@@ -354,7 +374,7 @@ class SLAM:
     # We need to see if we should move this function to the second class (Dana)
     def rescan(self, global_position: (int, int)):
         if self.vector==[]:
-            s = ('Number of static obstacles', 'Number of dynamic obstacles', 'Minimum distance from obstacle', 'Average distance from obstacles', 'Largest free angle', 'Section of fail')
+            s = ('Number of static obstacles', 'Number of dynamic obstacles', 'Minimum distance from obstacle', 'Average distance from obstacles', 'Largest free angle', 'Section of fail', 'Run number', 'Robot position')
             self.vector.append(s)
 
         # rescan local area
@@ -377,7 +397,7 @@ class SLAM:
                                                                               view_range=self.view_range)
 
         section_of_fail = self.ground_truth_map.section_of_fail()
-        status = (num_obstacles, num_dynamic_obstacles, min_distance, average_distance, largest_angle, section_of_fail)
+        status = (num_obstacles, num_dynamic_obstacles, min_distance, average_distance, largest_angle, section_of_fail, global_var.counter_runs, global_position)
         self.vector.append(status)
         #print("vector: ", self.vector)
         vertices = self.update_changed_edge_costs(local_grid=local_observation)
