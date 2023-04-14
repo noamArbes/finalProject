@@ -1,6 +1,5 @@
 import pygame
-import random
-import time
+import global_var
 from grid import OccupancyGridMap
 from typing import List
 
@@ -46,8 +45,8 @@ class Animation:
                  width=10,
                  height=10,
                  margin=0,
-                 x_dim=100,
-                 y_dim=50,
+                 x_dim=0,
+                 y_dim=0,
                  start=(0, 0),
                  startDyn = [],
                  goalB =(50, 50),
@@ -83,7 +82,8 @@ class Animation:
 
         # Set the 'width' and 'height' of the screen
         window_size = [(width + margin) * y_dim + margin,
-                       (height + margin) * x_dim + margin]
+                              (height + margin) * x_dim + margin]
+
 
         self.screen = pygame.display.set_mode(window_size)
 
@@ -172,7 +172,7 @@ class Animation:
                                                       self.height])
 
     def run_game(self, path_robot=None, path_obstacle=None):
-        self.total_time += clock.tick(10)  # Speed of the simulation
+        self.total_time += clock.tick(5)  # Speed of the simulation
         if path_robot is None:
             path_robot = []
         if path_obstacle is None:
@@ -183,6 +183,7 @@ class Animation:
             (x, y) = path_robot[1]
             self.set_position((x, y))
         counter = 0
+        # Set the dynamic obstacle in the grid to be recognized as an obstacle (Dana)
         for path in path_obstacle:
             if self.get_positionDyn(counter) != self.goalDyn[counter]:
                 if path:
@@ -261,45 +262,6 @@ class Animation:
                                   self.width,
                                   self.height])
 
-        # Old code for dynamic obstacles (Noam)
-        #     if self.counter == 2:
-        #         for row in range(self.x_dim):
-        #             for column in range(self.y_dim):
-        #                 # color the cells (background)
-        #                 if self.world.occupancy_grid_map[row][column] == 100:
-        #                     # set the location in the grid map
-        #                     r = row - 1
-        #                     c = column
-        #                     grid_cell = (r, c)
-        #                     remove_cell = (row,column)
-        #                     if self.world.is_unoccupied(grid_cell):
-        #                         #print(grid_cell)
-        #                         self.world.set_dynamic_obstacle(grid_cell)
-        #                         self.observation = {"pos": grid_cell, "type": DYN_OBSTACLE}
-        #                         self.world.remove_obstacle(remove_cell)
-        #                         self.observation = {"pos": remove_cell, "type": UNOCCUPIED}
-        #                         self.counter = 0
-        #     self.counter += 1
-
-        #     if self.counter_t2 == 2:
-        #         for row in range(self.x_dim):
-        #             for column in range(self.y_dim):
-        #                 # color the cells (background)
-        #                 if self.world.occupancy_grid_map[row][column] == 150:
-        #                     # set the location in the grid map
-        #                     r = row - 1
-        #                     c = column - 1
-        #                     grid_cell = (r, c)
-        #                     remove_cell = (row,column)
-        #                     if self.world.is_unoccupied(grid_cell):
-        #                         #print(grid_cell)
-        #                         self.world.set_dynamic_obstacle_t2(grid_cell)
-        #                         self.observation = {"pos": grid_cell, "type": DYN_OBSTACLE_T2}
-        #                         self.world.remove_obstacle(remove_cell)
-        #                         self.observation = {"pos": remove_cell, "type": UNOCCUPIED}
-        #                         self.counter_t2 = 0
-        #     self.counter_t2 += 1
-
         self.display_path(path=path_robot)  # if we disable this the path will disappear (Dana)
 
         # fill in the goalB cell with green
@@ -327,28 +289,18 @@ class Animation:
         robot_center = [round(self.current[1] * (self.width + self.margin) + self.width / 2) + self.margin,
                         round(
                             self.current[0] * (self.height + self.margin) + self.height / 2) + self.margin]
-        # draw a dynamic obstacle, based on current coordinates (Noam)
 
-        for i in range(0, 3):
-            dyn_center = [round(self.currentDyn[i][1] * (self.width + self.margin) + self.width / 2) + self.margin,
+        # draw all the dynamic obstacles (Dana)
+        for i in range(1, global_var.num_of_dyn_obs + 1):
+            dyn_center = [round(self.currentDyn[i-1][1] * (self.width + self.margin) + self.width / 2) + self.margin,
                           round(
-                              self.currentDyn[i][0] * (self.height + self.margin) + self.height / 2) + self.margin]
+                              self.currentDyn[i-1][0] * (self.height + self.margin) + self.height / 2) + self.margin]
             pygame.draw.circle(self.screen, BLACK, dyn_center, round(self.width / 2))
         # draw robot position as red circle
         pygame.draw.circle(self.screen, START, robot_center, round(self.width / 2))
 
-        # draw dynamic obstacle position as Black circle (Noam)
-        #pygame.draw.circle(self.screen, BLACK, dyn_center, round(self.width / 2))
-
-        # draw robot local grid map (viewing range - changed to a circle, need to change the obstacle viewer to the radius we defined)
-        #   pygame.draw.rect(self.screen, LOCAL_GRID,
-        #                   [robot_center[0] - self.viewing_range * (self.height + self.margin),
-        #                   robot_center[1] - self.viewing_range * (self.width + self.margin),
-        #                  2 * self.viewing_range * (self.height + self.margin),
-        #                 2 * self.viewing_range * (self.width + self.margin)], 2)
-
         # Draws the radius of the observation area of the robot (Noam)
-        pygame.draw.circle(surface=self.screen, color=BLACK, center=robot_center, radius=70.0, width=2)
+        pygame.draw.circle(surface=self.screen, color=BLACK, center=robot_center, radius=50.0, width=2)
 
         # set game tick
         self.clock.tick(60)  # changed to 60 like we told Tal (Dana)

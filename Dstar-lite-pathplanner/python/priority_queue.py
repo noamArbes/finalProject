@@ -65,7 +65,8 @@ class PriorityQueue:
         return self.heap[0].vertex
 
     def top_key(self):
-        if len(self.heap) == 0: return Priority(float('inf'), float('inf'))
+        if len(self.heap) == 0:
+            return Priority(float('inf'), float('inf'))
         return self.heap[0].priority
 
     def pop(self):

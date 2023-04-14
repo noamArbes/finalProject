@@ -25,12 +25,13 @@ if __name__ == '__main__':
     V (x=2, y=0)
     x, row
     """
-    x_dim = 80
-    y_dim = 100
-    start = (16, 16)  # changed (Noam)
-    goalB = (60, 45)  # green goal (Noam)
-    goalC = (25, 70)  # orange goal (Noam)
-    goalA = (16, 16)  # blue goal (Noam)
+
+    x_dim = 41
+    y_dim = 61
+    start = (9,9)  # changed (Noam)
+    goalB = (29, 19)  # green goal (Noam)
+    goalC = (17, 45)  # orange goal (Noam)
+    goalA = (9,9)  # blue goal (Noam)
     goalDyn = []
     startDyn = []
     new_pos_dyn = []
@@ -38,7 +39,7 @@ if __name__ == '__main__':
     path_list = []
     unoccupied_array = []
 
-    view_range = 7
+    view_range = 5
     global_var.arrivedA = True
     global_var.arrivedB1 = False
     global_var.arrivedB2 = False
@@ -59,19 +60,21 @@ if __name__ == '__main__':
 
     new_map = gui.world
     old_map = new_map
-
+    # Setting the start anf goal for every dynamic obstacle (Dana)
     unoccupied_array = new_map.find_zeros()
-    for i in range(1, 4):
+    for i in range(1, global_var.num_of_dyn_obs + 1):
         s = random.choice(unoccupied_array)
         startDyn.append(s)
-    for i in range(1, 4):
+    for i in range(1, global_var.num_of_dyn_obs + 1):
         g = random.choice(unoccupied_array)
         goalDyn.append(g)
         unoccupied_array.remove(g)
 
     new_position = start
     last_position = start
-    for i in range(1, 4):
+
+    # Setting the dynamic obstacles start position array (Dana)
+    for i in range(1, global_var.num_of_dyn_obs + 1):
         new_pos_dyn.append(startDyn[i-1])
         last_pos_dyn.append(startDyn[i-1])
 
@@ -90,8 +93,9 @@ if __name__ == '__main__':
                        s_start=start,
                        s_goal=goalA,
                        value=0)
+    # Setting all the dynamic obstacles Dstar path (Dana)
     dstar_list = []
-    for i in range(1, 4):
+    for i in range(1, global_var.num_of_dyn_obs + 1):
         dstar_obj = DStarLite(map=new_map,
                               s_start=startDyn[i-1],
                               s_goal=goalDyn[i-1],
@@ -102,15 +106,38 @@ if __name__ == '__main__':
     slam = SLAM(map=new_map,
                 view_range=view_range)
 
+    def Dynamic_obs_movement():
+        for i in range(1, global_var.num_of_dyn_obs + 1):
+            gui.world.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the gui map (Dana)
+            dstar_list[i - 1].sensed_map.remove_obstacle(
+                new_pos_dyn[i - 1])  # Remove the value from the grid map (g) (Dana)
+            new_pos_dyn[i - 1] = gui.currentDyn[i - 1]
+            gui.world.set_dynamic_obstacle(new_pos_dyn[i - 1])  # Setting the value in the gui map (Dana)
+        for i in range(1, global_var.num_of_dyn_obs + 1):
+            if new_pos_dyn[i - 1] != goalDyn[i - 1]:
+                path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
+            else:
+                path_list[i - 1] = []
+                g = random.choice(unoccupied_array)
+                goalDyn[i - 1] = g
+                unoccupied_array.remove(g)
+                dstar_obj = DStarLite(map=new_map,
+                                      s_start=last_pos_dyn[i - 1],
+                                      s_goal=goalDyn[i - 1],
+                                      value=DYN_OBSTACLE)
+                dstar_list[i - 1] = dstar_obj
+                path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
+
     while global_var.counter_runs < 3 and gui.done == False:
         if gui.done == True:
             pygame.quit()
         # move and compute path to the first path (Noam)
         path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
-        for i in range(1, 4):
-            print("hi", new_pos_dyn)
-            path_obj, g, rhs = dstar_list[i-1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i-1])
-            path_list.append(path_obj)
+        # Setting all the paths to the dynamic obstacles (Dana)
+        if global_var.counter_runs == 0:
+            for i in range(1, global_var.num_of_dyn_obs + 1):
+                path_obj, g, rhs = dstar_list[i-1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i-1])
+                path_list.append(path_obj)
 
         # first navigation to goalB (Noam)
         while global_var.arrivedA == True and global_var.arrivedB1 == False and global_var.arrivedB2 == False and \
@@ -123,17 +150,7 @@ if __name__ == '__main__':
             new_observation = gui.observation
             new_map = gui.world
 
-            # Dynamic obs movement
-            for i in range(1,4):
-                gui.world.remove_obstacle(new_pos_dyn[i-1])
-                dstar_list[i-1].sensed_map.remove_obstacle(new_pos_dyn[i-1])
-                new_pos_dyn[i-1] = gui.currentDyn[i-1]
-                gui.world.set_dynamic_obstacle(new_pos_dyn[i-1])
-            for i in range(1, 4):
-                if new_pos_dyn[i-1] != goalDyn[i-1]:
-                    path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
-                if new_pos_dyn[i-1] == gui.goalDyn[i-1]:
-                    path_list[i-1] = []
+            Dynamic_obs_movement()
 
             if new_position == goalB:
                 global_var.arrivedB1 = True
@@ -147,11 +164,12 @@ if __name__ == '__main__':
             if new_position != last_position:
                 last_position = new_position
                 # slam
+                # we need to add the dynamic obs slam
                 new_edges_and_old_costs, slam_map = slam.rescan(global_position=new_position)
                 dstar1.new_edges_and_old_costs = new_edges_and_old_costs
                 dstar1.sensed_map = slam_map
 
-            for i in range(1, 4):
+            for i in range(1, global_var.num_of_dyn_obs + 1):
                 if new_pos_dyn[i-1] != last_pos_dyn[i-1]:
                     last_pos_dyn[i-1] = new_pos_dyn[i-1]
 
@@ -168,24 +186,7 @@ if __name__ == '__main__':
             new_map = gui.world
 
             # Dynamic obs movement
-            for i in range(1,4):
-                gui.world.remove_obstacle(new_pos_dyn[i-1])
-                dstar_list[i-1].sensed_map.remove_obstacle(new_pos_dyn[i-1])
-                new_pos_dyn[i-1] = gui.currentDyn[i-1]
-                gui.world.set_dynamic_obstacle(new_pos_dyn[i-1])
-            for i in range(1, 4):
-                if new_pos_dyn[i-1] != goalDyn[i-1]:
-                    path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
-                if new_pos_dyn[i-1] == gui.goalDyn[i-1]:
-                    path_list[i-1] = []
-            #gui.world.remove_obstacle(new_position_dyn)
-            #new_position_dyn = gui.currentDyn
-            #gui.world.set_dynamic_obstacle(new_position_dyn)
-            #path_obstacle = dstar_list[0].move_and_replan_dyn(obstacle_position=new_position_dyn)
-            #path_obstacle1 = dstar_list[1].move_and_replan_dyn(obstacle_position=new_position_dyn)
-            #path_obstacle2 = dstar_list[2].move_and_replan_dyn(obstacle_position=new_position_dyn)
-            #if new_position_dyn == gui.goalDyn:
-            #    path_obstacle = []
+            Dynamic_obs_movement()
 
             if new_position == goalC:
                 global_var.arrivedB1 = True
@@ -203,7 +204,7 @@ if __name__ == '__main__':
                 dstar2.new_edges_and_old_costs = new_edges_and_old_costs
                 dstar2.sensed_map = slam_map
 
-            for i in range(1, 4):
+            for i in range(1, global_var.num_of_dyn_obs + 1):
                 if new_pos_dyn[i-1] != last_pos_dyn[i-1]:
                     last_pos_dyn[i-1] = new_pos_dyn[i-1]
 
@@ -219,25 +220,7 @@ if __name__ == '__main__':
             new_observation = gui.observation
             new_map = gui.world
 
-            # Dynamic obs movement
-            for i in range(1,4):
-                gui.world.remove_obstacle(new_pos_dyn[i-1])
-                dstar_list[i-1].sensed_map.remove_obstacle(new_pos_dyn[i-1])
-                new_pos_dyn[i-1] = gui.currentDyn[i-1]
-                gui.world.set_dynamic_obstacle(new_pos_dyn[i-1])
-            for i in range(1, 4):
-                if new_pos_dyn[i-1] != goalDyn[i-1]:
-                    path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
-                if new_pos_dyn[i-1] == gui.goalDyn[i-1]:
-                    path_list[i-1] = []
-            #gui.world.remove_obstacle(new_position_dyn)
-            #new_position_dyn = gui.currentDyn
-            #gui.world.set_dynamic_obstacle(new_position_dyn)
-            #path_obstacle = dstar_list[0].move_and_replan_dyn(obstacle_position=new_position_dyn)
-            #path_obstacle1 = dstar_list[1].move_and_replan_dyn(obstacle_position=new_position_dyn)
-            #path_obstacle2 = dstar_list[2].move_and_replan_dyn(obstacle_position=new_position_dyn)
-            #if new_position_dyn == gui.goalDyn:
-            #    path_obstacle = []
+            Dynamic_obs_movement()
 
             if new_position == goalB:
                 global_var.arrivedB1 = True
@@ -256,10 +239,9 @@ if __name__ == '__main__':
                 dstar1.new_edges_and_old_costs = new_edges_and_old_costs
                 dstar1.sensed_map = slam_map
 
-            for i in range(1, 4):
+            for i in range(1, global_var.num_of_dyn_obs + 1):
                 if new_pos_dyn[i-1] != last_pos_dyn[i-1]:
                     last_pos_dyn[i-1] = new_pos_dyn[i-1]
-
 
         # navigate back to goalA(Noam)
         while global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == True \
@@ -268,30 +250,11 @@ if __name__ == '__main__':
             path, g, rhs = dstar3.move_and_replan(robot_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_list)
 
-
             new_position = gui.current
             new_observation = gui.observation
             new_map = gui.world
 
-            # Dynamic obs movement
-            for i in range(1,4):
-                gui.world.remove_obstacle(new_pos_dyn[i-1])
-                dstar_list[i-1].sensed_map.remove_obstacle(new_pos_dyn[i-1])
-                new_pos_dyn[i-1] = gui.currentDyn[i-1]
-                gui.world.set_dynamic_obstacle(new_pos_dyn[i-1])
-            for i in range(1, 4):
-                if new_pos_dyn[i-1] != goalDyn[i-1]:
-                    path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
-                if new_pos_dyn[i-1] == gui.goalDyn[i-1]:
-                    path_list[i-1] = []
-            #gui.world.remove_obstacle(new_position_dyn)
-            #new_position_dyn = gui.currentDyn
-            #gui.world.set_dynamic_obstacle(new_position_dyn)
-            #path_obstacle = dstar_list[0].move_and_replan_dyn(obstacle_position=new_position_dyn)
-            #path_obstacle1 = dstar_list[1].move_and_replan_dyn(obstacle_position=new_position_dyn)
-            #path_obstacle2 = dstar_list[2].move_and_replan_dyn(obstacle_position=new_position_dyn)
-            #if new_position_dyn == gui.goalDyn:
-            #    path_obstacle = []
+            Dynamic_obs_movement()
 
             if new_position == goalA:
                 global_var.arrivedA = True
@@ -310,7 +273,7 @@ if __name__ == '__main__':
                 dstar3.new_edges_and_old_costs = new_edges_and_old_costs
                 dstar3.sensed_map = slam_map
 
-            for i in range(1, 4):
+            for i in range(1, global_var.num_of_dyn_obs + 1):
                 if new_pos_dyn[i-1] != last_pos_dyn[i-1]:
                     last_pos_dyn[i-1] = new_pos_dyn[i-1]
 

@@ -3,9 +3,6 @@ from utils import get_movements_4n, get_movements_8n, heuristic, Vertices, Verte
 from typing import Dict, List
 from Dynamic import dynamic_obs
 import math
-import random
-import csv
-import pygame
 import global_var
 
 OBSTACLE = 255
@@ -13,7 +10,6 @@ WALL = 200
 OBSTACLE_Z1 = 80
 OBSTACLE_Z2 = 20
 DYN_OBSTACLE = 100
-DYN_OBSTACLE_T2 = 150
 UNOCCUPIED = 0
 
 
@@ -39,62 +35,58 @@ class OccupancyGridMap:
         # the obstacle map
         self.occupancy_grid_map = np.zeros(self.map_extents, dtype=np.uint8)
 
-        #d = self.set_dynamic_obstacle(20,20)
-        # we can define here all the dynamic obstacles (Noam)
         # upper wall of the room
-        for i in range(11, 94):
-            self.occupancy_grid_map[7, i] = WALL
-            self.occupancy_grid_map[8, i] = OBSTACLE_Z1
-            self.occupancy_grid_map[9, i] = OBSTACLE_Z2
+        for i in range(5, y_dim-5):
+            self.occupancy_grid_map[5, i] = WALL
+            self.occupancy_grid_map[6, i] = OBSTACLE_Z1
+            self.occupancy_grid_map[7, i] = OBSTACLE_Z2
 
             # bottom wall of the room
-        for i in range(10, 95):
-            self.occupancy_grid_map[64, i] = WALL
-            self.occupancy_grid_map[63, i] = OBSTACLE_Z1
-            self.occupancy_grid_map[62, i] = OBSTACLE_Z2
+        for i in range(5, y_dim-5):
+            self.occupancy_grid_map[x_dim - 6, i] = WALL
+            self.occupancy_grid_map[x_dim - 7, i] = OBSTACLE_Z1
+            self.occupancy_grid_map[x_dim - 8, i] = OBSTACLE_Z2
 
             # left wall of the room
-        for i in range(7, 65):
-            self.occupancy_grid_map[i, 10] = WALL
-        for i in range(8, 64):
-            self.occupancy_grid_map[i, 11] = OBSTACLE_Z1
-            self.occupancy_grid_map[i, 12] = OBSTACLE_Z2
+        for i in range(5, x_dim-5):
+            self.occupancy_grid_map[i, 5] = WALL
+        for i in range(7, x_dim - 7):
+            self.occupancy_grid_map[i, 7] = OBSTACLE_Z2
+            self.occupancy_grid_map[i, 6] = OBSTACLE_Z1
 
             # right wall of the room
-        for i in range(7, 65):
-            self.occupancy_grid_map[i, 94] = WALL
-        for i in range(8, 64):
-            self.occupancy_grid_map[i, 93] = OBSTACLE_Z1
-            self.occupancy_grid_map[i, 92] = OBSTACLE_Z2
+        for i in range(5,x_dim-5):
+            self.occupancy_grid_map[i, y_dim - 6] = WALL
+        for i in range(7, x_dim - 7):
+            self.occupancy_grid_map[i, y_dim - 8] = OBSTACLE_Z2
+            self.occupancy_grid_map[i, y_dim - 7] = OBSTACLE_Z1
 
             # middle left wall of the room
-        for i in range(10, 35):
-            self.occupancy_grid_map[43, i] = WALL
-            self.occupancy_grid_map[42, i + 1] = OBSTACLE_Z1
-            self.occupancy_grid_map[41, i + 1] = OBSTACLE_Z2
-            self.occupancy_grid_map[44, i + 1] = OBSTACLE_Z1
-            self.occupancy_grid_map[45, i + 1] = OBSTACLE_Z2
+        for i in range(5, int((y_dim - 1)/2) - 5):
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 5, i] = WALL
+        for i in range(7, int((y_dim - 1) / 2) - 7):
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 3, i + 1] = OBSTACLE_Z2
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 4, i + 1] = OBSTACLE_Z1
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i + 1] = OBSTACLE_Z2
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 6, i + 1] = OBSTACLE_Z1
 
             # middle right wall of the room
-        for i in range(70, 95):
-            self.occupancy_grid_map[43, i] = WALL
-            self.occupancy_grid_map[42, i - 1] = OBSTACLE_Z1
-            self.occupancy_grid_map[41, i - 1] = OBSTACLE_Z2
-            self.occupancy_grid_map[44, i - 1] = OBSTACLE_Z1
-            self.occupancy_grid_map[45, i - 1] = OBSTACLE_Z2
+        for i in range(int((y_dim - 1)/2) + 5, y_dim - 5):
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 5, i] = WALL
+        for i in range(int((y_dim - 1) / 2) + 7, y_dim - 7):
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 3, i - 1] = OBSTACLE_Z2
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 4, i - 1] = OBSTACLE_Z1
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i - 1] = OBSTACLE_Z2
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 6, i - 1] = OBSTACLE_Z1
 
-        for i in range(75, 90):
-            self.occupancy_grid_map[44, i] = WALL
-            self.occupancy_grid_map[45, i] = WALL
+            # Some obstacles
+        for i in range(41, 52):
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 6, i] = OBSTACLE
+            self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i] = OBSTACLE
 
-        for i in range(75, 90):
-            self.occupancy_grid_map[45, i] = WALL
-            self.occupancy_grid_map[44, i] = WALL
-
-        for i in range(75, 90):
-            self.occupancy_grid_map[45, i] = WALL
-            self.occupancy_grid_map[44, i] = WALL
-
+        for i in range(15, 27):
+            self.occupancy_grid_map[33, i] = OBSTACLE
+            self.occupancy_grid_map[34, i] = OBSTACLE
 
         # obstacles
         self.visited = {}
@@ -115,6 +107,7 @@ class OccupancyGridMap:
         """
         self.occupancy_grid_map = new_ogrid
 
+    # Checks if there is any obstacle/wall in this position
     def is_unoccupied(self, pos: (int, int)) -> bool:
         """
         :param pos: cell position we wish to check
@@ -125,10 +118,10 @@ class OccupancyGridMap:
 
         # if not self.in_bounds(cell=(x, y)):
         #    raise IndexError("Map index out of bounds")
-
-
         return self.occupancy_grid_map[row][col] == UNOCCUPIED
 
+
+    # Checks if there is a statis obstacle in this position (Dana)
     def is_static_obs(self, pos: (int, int)) -> bool:
         """
         :param pos: cell position we wish to check
@@ -142,6 +135,7 @@ class OccupancyGridMap:
             is_unoccupied = False
         return is_unoccupied
 
+    # Checks if there is a dynamic obstacle in this position (Dana)
     def is_dyn_obs(self, pos: (int, int)) -> bool:
         """
         :param pos: cell position we wish to check
@@ -176,6 +170,7 @@ class OccupancyGridMap:
             return [node for node in neighbors if self.in_bounds(node) and self.is_unoccupied(node)]
         return [node for node in neighbors if self.in_bounds(node)]
 
+    # This function checks all the points around the robot/dynamic obstacle position to calculate the next step (Dana)
     def succ(self, vertex: (int, int), avoid_obstacles: bool = True) -> list:
         """
         :param avoid_obstacles:
@@ -188,7 +183,6 @@ class OccupancyGridMap:
             movements = get_movements_4n(x=x, y=y)
         else:
             movements = get_movements_8n(x=x, y=y)
-
         # not needed. Just makes aesthetics to the path
         if (x + y) % 2 == 0:
             movements.reverse()
@@ -223,10 +217,11 @@ class OccupancyGridMap:
         (row, col) = (x, y)
         self.occupancy_grid_map[row, col] = UNOCCUPIED
 
+    # Find the free locations for setting the obstacles start position and goal (Dana)
     def find_zeros(self):
         zeros = []
-        for x in range(10,60):
-            for y in range(13,60):
+        for x in range(5,self.x_dim-5):
+            for y in range(5,self.y_dim-5):
                 pos = (x, y)
                 if self.is_unoccupied(pos=pos):
                     zeros.append((x, y))
@@ -240,6 +235,7 @@ class OccupancyGridMap:
         # we need check if we need to understand how to check if dynamic or static (Dana)
         return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
 
+    # Count static obstacles (Dana)
     def count_obstacles_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
@@ -251,18 +247,19 @@ class OccupancyGridMap:
                 count += 1
         return count
 
+    # Count dynamic obstacles (Dana)
     def count_dynamic_obstacles_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
-        # help prints (Dana)
         count = 0
         for node in nodes:
             if self.occupancy_grid_map[node] == DYN_OBSTACLE:
                 count += 1
         return count
 
+    # Checks minimal distance between obstacles (Dana)
     def minimal_distance_local_observation(self, global_position: (int, int), view_range: int = 7):
         (px, py) = global_position
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
@@ -331,7 +328,8 @@ class OccupancyGridMap:
             return (360 - largest_free_angle)
         return largest_free_angle
 
-    def section_of_fail(self): #function to check where the robot fails (Noam)
+    # Checks the current goal of the robot (Dana)
+    def section_of_fail(self):
         if global_var.arrivedA == True and global_var.arrivedB1 == False and global_var.arrivedB2 == False and \
                 global_var.arrivedC == False:
             return "A to B"
@@ -407,7 +405,7 @@ class SLAM:
         vertices = Vertices()
         for node, value in local_grid.items():
             # if obstacle
-            if value == OBSTACLE:
+            if value == OBSTACLE: # everything counts as an obstacle (Dana)
                 if self.slam_map.is_unoccupied(node):
                     v = Vertex(pos=node)
                     succ = self.slam_map.succ(node)

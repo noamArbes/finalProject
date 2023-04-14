@@ -39,7 +39,7 @@ class DStarLite:
         :param s: the vertex we want to calculate key
         :return: Priority class of the two keys
         """
-        print(s)
+        #print(s)
         k1 = min(self.g[s], self.rhs[s]) + heuristic(self.s_start, s) + self.k_m
         k2 = min(self.g[s], self.rhs[s])
         return Priority(k1, k2)
@@ -51,11 +51,12 @@ class DStarLite:
         :param v: to vertex
         :return: euclidean distance to traverse. inf if obstacle in path
         """
-        if not self.sensed_map.is_static_obs(u) or not self.sensed_map.is_static_obs(v) or not self.sensed_map.is_dyn_obs(u) or not self.sensed_map.is_dyn_obs(v):
-            print("prob")
+        #if not self.sensed_map.is_static_obs(u) or not self.sensed_map.is_static_obs(v) or not self.sensed_map.is_dyn_obs(u) or not self.sensed_map.is_dyn_obs(v):
+        if not self.sensed_map.is_unoccupied(u) or not self.sensed_map.is_unoccupied(v):
+            #print("prob")
             return float('inf')
         else:
-            return heuristic(u, v)
+            return heuristic(u, v) # compute distance between two points
 
     def contain(self, u: (int, int)) -> (int, int):
         return u in self.U.vertices_in_heap
@@ -69,9 +70,9 @@ class DStarLite:
             self.U.remove(u)
 
     def compute_shortest_path(self):
-        print("s ", self.s_start)
-        if self.s_start == None:
-            print("here")
+        #print("s ", self.s_start)
+        #if self.s_start == None:
+        #   print("here")
         while self.U.top_key() < self.calculate_key(self.s_start) or self.rhs[self.s_start] > self.g[self.s_start]:
             u = self.U.top()
             k_old = self.U.top_key()
@@ -117,7 +118,7 @@ class DStarLite:
 
         while self.s_start != self.s_goal:
             assert (self.rhs[self.s_start] != float('inf')), "There is no known path!"
-            succ = self.sensed_map.succ(self.s_start, avoid_obstacles=False)
+            succ = self.sensed_map.succ(self.s_start, avoid_obstacles=True) # return the list of neighbors
             min_s = float('inf')
             arg_min = None
             for s_ in succ:
@@ -169,16 +170,16 @@ class DStarLite:
 
         while self.s_start != self.s_goal: # while the obstacle didn't reach the goal
 
-            succ = self.sensed_map.succ(self.s_start, avoid_obstacles=False)
-            print("sss", succ)
+            succ = self.sensed_map.succ(self.s_start, avoid_obstacles=True)
+            #print("sss", succ)
             min_s = float('inf')
             arg_min = None
             for s_ in succ:
-                print("vals", self.s_start, s_, self.g[s_])
-                print ("nn", self.c(self.s_start, s_) )
+                #print("vals", self.s_start, s_, self.g[s_])
+                #print ("nn", self.c(self.s_start, s_) )
                 s = self.c(self.s_start, s_)
                 temp = self.c(self.s_start, s_) + self.g[s_]
-                print("temp", temp)
+                #print("temp", temp)
                 if temp < min_s:
                     min_s = temp
                     arg_min = s_
