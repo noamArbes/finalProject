@@ -1,7 +1,6 @@
 import numpy as np
 from utils import get_movements_4n, get_movements_8n, heuristic, Vertices, Vertex
 from typing import Dict, List
-from Dynamic import dynamic_obs
 import math
 import global_var
 
@@ -64,7 +63,7 @@ class OccupancyGridMap:
             # middle left wall of the room
         for i in range(5, int((y_dim - 1)/2) - 5):
             self.occupancy_grid_map[int((x_dim - 1)/2) + 5, i] = WALL
-        for i in range(7, int((y_dim - 1) / 2) - 7):
+        for i in range(7, int((y_dim - 1) / 2) - 5):
             self.occupancy_grid_map[int((x_dim - 1)/2) + 3, i + 1] = OBSTACLE_Z2
             self.occupancy_grid_map[int((x_dim - 1)/2) + 4, i + 1] = OBSTACLE_Z1
             self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i + 1] = OBSTACLE_Z2
@@ -73,7 +72,7 @@ class OccupancyGridMap:
             # middle right wall of the room
         for i in range(int((y_dim - 1)/2) + 5, y_dim - 5):
             self.occupancy_grid_map[int((x_dim - 1)/2) + 5, i] = WALL
-        for i in range(int((y_dim - 1) / 2) + 7, y_dim - 7):
+        for i in range(int((y_dim - 1) / 2) + 5, y_dim - 7):
             self.occupancy_grid_map[int((x_dim - 1)/2) + 3, i - 1] = OBSTACLE_Z2
             self.occupancy_grid_map[int((x_dim - 1)/2) + 4, i - 1] = OBSTACLE_Z1
             self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i - 1] = OBSTACLE_Z2
@@ -131,7 +130,7 @@ class OccupancyGridMap:
         (row, col) = (x, y)
 
         is_unoccupied = True
-        if self.occupancy_grid_map[row][col] == 255:
+        if self.occupancy_grid_map[row][col] == OBSTACLE:
             is_unoccupied = False
         return is_unoccupied
 
@@ -145,7 +144,7 @@ class OccupancyGridMap:
         (row, col) = (x, y)
 
         is_unoccupied = True
-        if self.occupancy_grid_map[row][col] == 100:
+        if self.occupancy_grid_map[row][col] == DYN_OBSTACLE:
             is_unoccupied = False
         return is_unoccupied
 
@@ -352,7 +351,6 @@ class SLAM:
                                          y_dim=map.y_dim)
         self.view_range = view_range
         self.vector = []
-
 
     def set_ground_truth_map(self, gt_map: OccupancyGridMap):
         self.ground_truth_map = gt_map

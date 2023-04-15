@@ -23,7 +23,6 @@ class Vertices:
 
     def add_vertex(self, v: Vertex):
         self.list.append(v)
-        print(self.list)
 
     @property
     def vertices(self):
