@@ -222,7 +222,7 @@ class OccupancyGridMap:
         for x in range(5,self.x_dim-5):
             for y in range(5,self.y_dim-5):
                 pos = (x, y)
-                if self.is_unoccupied(pos=pos):
+                if self.is_unoccupied(pos=pos) and pos != (9, 9) and pos != (29, 19) and pos != (17, 45) :
                     zeros.append((x, y))
         return zeros
     def local_observation(self, global_position: (int, int), view_range: int = 7) -> Dict:
@@ -395,12 +395,11 @@ class SLAM:
         section_of_fail = self.ground_truth_map.section_of_fail()
         status = (num_obstacles, num_dynamic_obstacles, min_distance, average_distance, largest_angle, section_of_fail, global_var.counter_runs, global_position)
         self.vector.append(status)
-        #print("vector: ", self.vector)
         vertices = self.update_changed_edge_costs(local_grid=local_observation)
         return vertices, self.slam_map
 
     def update_changed_edge_costs(self, local_grid: Dict) -> Vertices:
-        vertices = Vertices()
+        vertices = Vertices() # returns all the neighbors
         for node, value in local_grid.items():
             # if obstacle
             if value == OBSTACLE: # everything counts as an obstacle (Dana)
@@ -411,25 +410,6 @@ class SLAM:
                         v.add_edge_with_cost(succ=u, cost=self.c(u, v.pos))
                     vertices.add_vertex(v)
                     self.slam_map.set_obstacle(node)
-
-
- #         if value == DYN_OBSTACLE:
- #             if self.slam_map.is_unoccupied(node):
- #                 v = Vertex(pos=node)
- #                 succ = self.slam_map.succ(node)
- #                 for u in succ:
- #                     v.add_edge_with_cost(succ=u, cost=self.c(u, v.pos))
- #                 vertices.add_vertex(v)
- #                 self.slam_map.set_dynamic_obstacle(node)
-
- #         elif value == DYN_OBSTACLE_T2:
- #             if self.slam_map.is_unoccupied(node):
- #                 v = Vertex(pos=node)
- #                 succ = self.slam_map.succ(node)
- #                 for u in succ:
- #                     v.add_edge_with_cost(succ=u, cost=self.c(u, v.pos))
- #                 vertices.add_vertex(v)
- #                 self.slam_map.set_dynamic_obstacle_t2(node)
 
             else:
                 # if white cell

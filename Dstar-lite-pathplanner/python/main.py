@@ -59,6 +59,7 @@ if __name__ == '__main__':
 
     new_map = gui.world
     old_map = new_map
+
     # Setting the start anf goal for every dynamic obstacle (Dana)
     unoccupied_array = new_map.find_zeros()
     for i in range(1, global_var.num_of_dyn_obs + 1):
@@ -105,6 +106,25 @@ if __name__ == '__main__':
     slam = SLAM(map=new_map,
                 view_range=view_range)
 
+    def Robot_movement(last_position, dstar, new_position):
+
+        new_position = gui.current
+        new_observation = gui.observation
+        new_map = gui.world
+        # d star
+        if new_observation is not None:
+            old_map = new_map
+            slam.set_ground_truth_map(gt_map=new_map)
+        if new_position != last_position:
+            last_position = new_position
+            # slam
+            new_edges_and_old_costs, slam_map = slam.rescan(global_position=new_position)
+            dstar.new_edges_and_old_costs = new_edges_and_old_costs
+            dstar.sensed_map = slam_map
+
+        return old_map, last_position, new_position
+
+
     def Dynamic_obs_movement():
         for i in range(1, global_var.num_of_dyn_obs + 1):
             gui.world.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the gui map (Dana)
@@ -146,39 +166,18 @@ if __name__ == '__main__':
             path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_list)
 
-            new_position = gui.current
-            new_observation = gui.observation
-            new_map = gui.world
-
             Dynamic_obs_movement()
+            old_map, last_position, new_position = Robot_movement(last_position, dstar1, new_position)
+
+            for i in range(1, global_var.num_of_dyn_obs + 1):
+                if new_pos_dyn[i-1] != last_pos_dyn[i-1]:
+                    last_pos_dyn[i-1] = new_pos_dyn[i-1]
 
             if new_position == goalB:
                 global_var.arrivedB1 = True
                 global_var.arrivedB2 = False
                 global_var.arrivedA = False
                 global_var.arrivedC = False
-                # d star
-            if new_observation is not None:
-                old_map = new_map
-                slam.set_ground_truth_map(gt_map=new_map)
-            if new_position != last_position:
-                last_position = new_position
-                # slam
-                # we need to add the dynamic obs slam
-                new_edges_and_old_costs, slam_map = slam.rescan(global_position=new_position)
-                dstar1.new_edges_and_old_costs = new_edges_and_old_costs
-                dstar1.sensed_map = slam_map
-
-
-
-            for i in range(1, global_var.num_of_dyn_obs + 1):
-                if new_pos_dyn[i-1] != last_pos_dyn[i-1]:
-                    last_pos_dyn[i-1] = new_pos_dyn[i-1]
-                    new_pos = new_pos_dyn[i-1]
-                    new_edges_and_old_costs_dyn, slam_map = slam.rescan(global_position=new_pos)
-                    dstar_list[i-1].new_edges_and_old_costs =  new_edges_and_old_costs_dyn
-                    dstar_list[i-1].sensed_map = slam_map
-
 
         # navigation to goalC (Noam)
         while global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == False \
@@ -187,37 +186,18 @@ if __name__ == '__main__':
             path, g, rhs = dstar2.move_and_replan(robot_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_list)
 
-            new_position = gui.current
-            new_observation = gui.observation
-            new_map = gui.world
-
-            # Dynamic obs movement
             Dynamic_obs_movement()
+            old_map, last_position, new_position = Robot_movement(last_position, dstar2, new_position)
 
             if new_position == goalC:
                 global_var.arrivedB1 = True
                 global_var.arrivedB2 = False
                 global_var.arrivedA = False
                 global_var.arrivedC = True
-            # d star
-            if new_observation is not None:
-                old_map = new_map
-                slam.set_ground_truth_map(gt_map=new_map)
-
-            if new_position != last_position:
-                last_position = new_position
-                new_edges_and_old_costs, slam_map = slam.rescan(global_position=new_position)
-                dstar2.new_edges_and_old_costs = new_edges_and_old_costs
-                dstar2.sensed_map = slam_map
 
             for i in range(1, global_var.num_of_dyn_obs + 1):
                 if new_pos_dyn[i-1] != last_pos_dyn[i-1]:
                     last_pos_dyn[i-1] = new_pos_dyn[i-1]
-                    new_pos = new_pos_dyn[i-1]
-                    new_edges_and_old_costs_dyn, slam_map = slam.rescan(global_position=new_pos)
-                    dstar_list[i-1].new_edges_and_old_costs =  new_edges_and_old_costs_dyn
-                    dstar_list[i-1].sensed_map = slam_map
-
 
         # navigate to goalB the second time (Noam)
         while global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == False \
@@ -226,11 +206,8 @@ if __name__ == '__main__':
             path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_list)
 
-            new_position = gui.current
-            new_observation = gui.observation
-            new_map = gui.world
-
             Dynamic_obs_movement()
+            old_map, last_position, new_position = Robot_movement(last_position, dstar1, new_position)
 
             if new_position == goalB:
                 global_var.arrivedB1 = True
@@ -238,25 +215,9 @@ if __name__ == '__main__':
                 global_var.arrivedA = False
                 global_var.arrivedC = True
 
-            # d star
-            if new_observation is not None:
-                old_map = new_map
-                slam.set_ground_truth_map(gt_map=new_map)
-
-            if new_position != last_position:
-                last_position = new_position
-                new_edges_and_old_costs, slam_map = slam.rescan(global_position=new_position)
-                dstar1.new_edges_and_old_costs = new_edges_and_old_costs
-                dstar1.sensed_map = slam_map
-
             for i in range(1, global_var.num_of_dyn_obs + 1):
                 if new_pos_dyn[i-1] != last_pos_dyn[i-1]:
                     last_pos_dyn[i-1] = new_pos_dyn[i-1]
-                    new_pos = new_pos_dyn[i-1]
-                    new_edges_and_old_costs_dyn, slam_map = slam.rescan(global_position=new_pos)
-                    dstar_list[i-1].new_edges_and_old_costs =  new_edges_and_old_costs_dyn
-                    dstar_list[i-1].sensed_map = slam_map
-
 
         # navigate back to goalA(Noam)
         while global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == True \
@@ -270,6 +231,7 @@ if __name__ == '__main__':
             new_map = gui.world
 
             Dynamic_obs_movement()
+            old_map, last_position, new_position = Robot_movement(last_position, dstar3, new_position)
 
             if new_position == goalA:
                 global_var.arrivedA = True
@@ -278,25 +240,9 @@ if __name__ == '__main__':
                 global_var.arrivedC = False
                 global_var.counter_runs = global_var.counter_runs + 1
 
-            if new_observation is not None:
-                old_map = new_map
-                slam.set_ground_truth_map(gt_map=new_map)
-
-            if new_position != last_position:
-                last_position = new_position
-                new_edges_and_old_costs, slam_map = slam.rescan(global_position=new_position)
-                dstar3.new_edges_and_old_costs = new_edges_and_old_costs
-                dstar3.sensed_map = slam_map
-
             for i in range(1, global_var.num_of_dyn_obs + 1):
                 if new_pos_dyn[i-1] != last_pos_dyn[i-1]:
                     last_pos_dyn[i-1] = new_pos_dyn[i-1]
-                    new_pos = new_pos_dyn[i-1]
-                    new_edges_and_old_costs_dyn, slam_map = slam.rescan(global_position=new_pos)
-                    dstar_list[i-1].new_edges_and_old_costs =  new_edges_and_old_costs_dyn
-                    dstar_list[i-1].sensed_map = slam_map
-
-
 
     # export csv file (Dana)
     with open('slam.vector.csv', 'w', newline='') as csvfile:
