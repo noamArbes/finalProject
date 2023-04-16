@@ -27,10 +27,10 @@ if __name__ == '__main__':
 
     x_dim = 41
     y_dim = 61
-    start = (9,9)  # changed (Noam)
-    goalB = (29, 19)  # green goal (Noam)
-    goalC = (17, 45)  # orange goal (Noam)
-    goalA = (9,9)  # blue goal (Noam)
+    start = (9,9)
+    goalB = (29, 19)
+    goalC = (17, 45)
+    goalA = (9, 9)
     goalDyn = []
     startDyn = []
     new_pos_dyn = []
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     slam = SLAM(map=new_map,
                 view_range=view_range)
 
-    def Robot_movement(last_position, dstar, new_position):
+    def Robot_movement(last_position, dstar):
 
         new_position = gui.current
         new_observation = gui.observation
@@ -124,12 +124,10 @@ if __name__ == '__main__':
 
         return old_map, last_position, new_position
 
-
     def Dynamic_obs_movement():
         for i in range(1, global_var.num_of_dyn_obs + 1):
             gui.world.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the gui map (Dana)
-            dstar_list[i - 1].sensed_map.remove_obstacle(
-                new_pos_dyn[i - 1])  # Remove the value from the grid map (g) (Dana)
+            dstar_list[i - 1].sensed_map.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the grid map (g) (Dana)
             new_pos_dyn[i - 1] = gui.currentDyn[i - 1]
             gui.world.set_dynamic_obstacle(new_pos_dyn[i - 1])  # Setting the value in the gui map (Dana)
         for i in range(1, global_var.num_of_dyn_obs + 1):
@@ -146,6 +144,8 @@ if __name__ == '__main__':
                                       value=DYN_OBSTACLE)
                 dstar_list[i - 1] = dstar_obj
                 path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
+
+
 
     # Run simulation
     while global_var.counter_runs < 3 and gui.done == False:
@@ -167,7 +167,7 @@ if __name__ == '__main__':
             gui.run_game(path_robot=path, path_obstacle=path_list)
 
             Dynamic_obs_movement()
-            old_map, last_position, new_position = Robot_movement(last_position, dstar1, new_position)
+            old_map, last_position, new_position = Robot_movement(last_position, dstar1)
 
             for i in range(1, global_var.num_of_dyn_obs + 1):
                 if new_pos_dyn[i-1] != last_pos_dyn[i-1]:
@@ -187,7 +187,7 @@ if __name__ == '__main__':
             gui.run_game(path_robot=path, path_obstacle=path_list)
 
             Dynamic_obs_movement()
-            old_map, last_position, new_position = Robot_movement(last_position, dstar2, new_position)
+            old_map, last_position, new_position = Robot_movement(last_position, dstar2)
 
             if new_position == goalC:
                 global_var.arrivedB1 = True
@@ -207,7 +207,7 @@ if __name__ == '__main__':
             gui.run_game(path_robot=path, path_obstacle=path_list)
 
             Dynamic_obs_movement()
-            old_map, last_position, new_position = Robot_movement(last_position, dstar1, new_position)
+            old_map, last_position, new_position = Robot_movement(last_position, dstar1)
 
             if new_position == goalB:
                 global_var.arrivedB1 = True
@@ -226,12 +226,8 @@ if __name__ == '__main__':
             path, g, rhs = dstar3.move_and_replan(robot_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_list)
 
-            new_position = gui.current
-            new_observation = gui.observation
-            new_map = gui.world
-
             Dynamic_obs_movement()
-            old_map, last_position, new_position = Robot_movement(last_position, dstar3, new_position)
+            old_map, last_position, new_position = Robot_movement(last_position, dstar3)
 
             if new_position == goalA:
                 global_var.arrivedA = True

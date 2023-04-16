@@ -11,7 +11,6 @@ OBSTACLE_Z2 = 20
 DYN_OBSTACLE = 100
 UNOCCUPIED = 0
 
-
 class OccupancyGridMap:
 
     def __init__(self, x_dim, y_dim, exploration_setting='8N'):

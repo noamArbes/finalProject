@@ -112,17 +112,16 @@ class Animation:
         # used to manage how fast the screen updates
         self.clock = pygame.time.Clock()
 
-
     def get_position(self):
         return self.current
 
     def set_position(self, pos: (int, int)):
         self.current = pos
 
-    def get_positionDyn(self, i):  # Noam
+    def get_positionDyn(self, i):
         return self.currentDyn[i]
 
-    def set_positionDyn(self, pos: (int, int), i):  # Noam
+    def set_positionDyn(self, pos: (int, int), i):
         self.currentDyn[i] = pos
 
     def get_goalB(self):
@@ -137,10 +136,10 @@ class Animation:
     def set_goalA(self, goalA: (int, int)):
         self.goalA = goalA
 
-    def get_goalDyn(self):  # Noam
+    def get_goalDyn(self):
         return self.goalDyn
 
-    def set_goalDyn(self, goalDyn: (int, int)):  # Noam
+    def set_goalDyn(self, goalDyn: (int, int)):
         self.goalDyn = goalDyn
 
     def get_goalC(self):
@@ -279,12 +278,14 @@ class Animation:
                                                (self.margin + self.height) * self.goalA[0] + self.margin,
                                                self.width,
                                                self.height])
+
         # fill in the goalDyn cell with green, will blank later on (Noam)
         #for i in range(1, len(self.goalDyn)):
         #    pygame.draw.rect(self.screen, GOAL_DYN, [(self.margin + self.width) * self.goalDyn.i[1] + self.margin,
         #                                             (self.margin + self.height) * self.goalDyn.i[0] + self.margin,
         #                                             self.width,
         #                                             self.height])
+
         # draw a moving robot, based on current coordinates
         robot_center = [round(self.current[1] * (self.width + self.margin) + self.width / 2) + self.margin,
                         round(
