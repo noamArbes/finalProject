@@ -9,4 +9,4 @@ arrivedC = False
 global counter_runs
 counter_runs = 0
 global num_of_dyn_obs
-num_of_dyn_obs = 4
+num_of_dyn_obs = 0

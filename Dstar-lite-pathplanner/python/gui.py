@@ -35,7 +35,7 @@ colors = {
     80: OBSTACLE_Z1,
     20: OBSTACLE_Z2,
     100: DYN_OBSTACLE,
-    200: WALL
+    255: WALL,
 }
 
 
@@ -185,7 +185,8 @@ class Animation:
         # Set the dynamic obstacle in the grid to be recognized as an obstacle (Dana)
         for path in path_obstacle:
             if self.get_positionDyn(counter) != self.goalDyn[counter]:
-                if path:
+                if len(path) >1:
+                    #print(path[1])
                     (x, y) = path[1]
                     self.set_positionDyn((x, y), counter)
                     counter += 1

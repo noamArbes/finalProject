@@ -5,7 +5,7 @@ import math
 import global_var
 
 OBSTACLE = 255
-WALL = 200
+WALL = 255
 OBSTACLE_Z1 = 80
 OBSTACLE_Z2 = 20
 DYN_OBSTACLE = 100
@@ -33,58 +33,130 @@ class OccupancyGridMap:
         # the obstacle map
         self.occupancy_grid_map = np.zeros(self.map_extents, dtype=np.uint8)
 
+#
+#        # upper wall of the room
+#        for i in range(5, y_dim-5):
+#            self.occupancy_grid_map[5, i] = WALL
+#            self.occupancy_grid_map[6, i] = OBSTACLE_Z1
+#            self.occupancy_grid_map[7, i] = OBSTACLE_Z2
+
+#            # bottom wall of the room
+#        for i in range(5, y_dim-5):
+#            self.occupancy_grid_map[x_dim - 6, i] = WALL
+#            self.occupancy_grid_map[x_dim - 7, i] = OBSTACLE_Z1
+#            self.occupancy_grid_map[x_dim - 8, i] = OBSTACLE_Z2
+
+#            # left wall of the room
+#        for i in range(5, x_dim-5):
+#            self.occupancy_grid_map[i, 5] = WALL
+#        for i in range(7, x_dim - 7):
+#            self.occupancy_grid_map[i, 7] = OBSTACLE_Z2
+#            self.occupancy_grid_map[i, 6] = OBSTACLE_Z1
+
+#            # right wall of the room
+#        for i in range(5,x_dim-5):
+#            self.occupancy_grid_map[i, y_dim - 6] = WALL
+#        for i in range(7, x_dim - 7):
+#            self.occupancy_grid_map[i, y_dim - 8] = OBSTACLE_Z2
+#            self.occupancy_grid_map[i, y_dim - 7] = OBSTACLE_Z1
+
+#            # middle left wall of the room
+#        for i in range(5, int((y_dim - 1)/2) - 5):
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 5, i] = WALL
+#        for i in range(7, int((y_dim - 1) / 2) - 5):
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 3, i + 1] = OBSTACLE_Z2
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 4, i + 1] = OBSTACLE_Z1
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i + 1] = OBSTACLE_Z2
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 6, i + 1] = OBSTACLE_Z1
+
+#            # middle right wall of the room
+#        for i in range(int((y_dim - 1)/2) + 5, y_dim - 5):
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 5, i] = WALL
+#        for i in range(int((y_dim - 1) / 2) + 5, y_dim - 7):
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 3, i - 1] = OBSTACLE_Z2
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 4, i - 1] = OBSTACLE_Z1
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i - 1] = OBSTACLE_Z2
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 6, i - 1] = OBSTACLE_Z1
+
+#            # Some obstacles
+#        for i in range(41, 52):
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 6, i] = OBSTACLE
+#            self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i] = OBSTACLE
+
+#        for i in range(15, 27):
+#            self.occupancy_grid_map[33, i] = OBSTACLE
+#            self.occupancy_grid_map[34, i] = OBSTACLE
+
+            # middle left wall of the room
+        for i in range(0, y_dim - 35):
+            self.occupancy_grid_map[x_dim - 13, i] = WALL
+        for i in range(0, y_dim - 34):
+            self.occupancy_grid_map[x_dim - 11, i] = OBSTACLE_Z2
+            self.occupancy_grid_map[x_dim - 12, i] = OBSTACLE_Z1
+            self.occupancy_grid_map[x_dim - 14, i] = OBSTACLE_Z1
+            self.occupancy_grid_map[x_dim - 15, i] = OBSTACLE_Z2
+
+            # middle right wall of the room
+        for i in range(y_dim - 25, y_dim):
+            self.occupancy_grid_map[x_dim - 13, i] = WALL
+        for i in range(y_dim - 26, y_dim):
+            self.occupancy_grid_map[x_dim - 11, i] = OBSTACLE_Z2
+            self.occupancy_grid_map[x_dim - 12, i] = OBSTACLE_Z1
+            self.occupancy_grid_map[x_dim - 15, i] = OBSTACLE_Z2
+            self.occupancy_grid_map[x_dim - 14, i] = OBSTACLE_Z1
+
         # upper wall of the room
-        for i in range(5, y_dim-5):
+        for i in range(10, y_dim - 10):
             self.occupancy_grid_map[5, i] = WALL
             self.occupancy_grid_map[6, i] = OBSTACLE_Z1
             self.occupancy_grid_map[7, i] = OBSTACLE_Z2
 
             # bottom wall of the room
-        for i in range(5, y_dim-5):
-            self.occupancy_grid_map[x_dim - 6, i] = WALL
-            self.occupancy_grid_map[x_dim - 7, i] = OBSTACLE_Z1
-            self.occupancy_grid_map[x_dim - 8, i] = OBSTACLE_Z2
+        for i in range(0, y_dim):
+            self.occupancy_grid_map[x_dim - 5, i] = WALL
+            self.occupancy_grid_map[x_dim - 6, i] = OBSTACLE_Z1
+            self.occupancy_grid_map[x_dim - 7, i] = OBSTACLE_Z2
 
             # left wall of the room
-        for i in range(5, x_dim-5):
-            self.occupancy_grid_map[i, 5] = WALL
-        for i in range(7, x_dim - 7):
-            self.occupancy_grid_map[i, 7] = OBSTACLE_Z2
-            self.occupancy_grid_map[i, 6] = OBSTACLE_Z1
+        for i in range(5, x_dim - 13):
+            self.occupancy_grid_map[i, 10] = WALL
+        for i in range(7, x_dim - 15):
+            self.occupancy_grid_map[i, 11] = OBSTACLE_Z1
+            self.occupancy_grid_map[i, 12] = OBSTACLE_Z2
 
             # right wall of the room
-        for i in range(5,x_dim-5):
-            self.occupancy_grid_map[i, y_dim - 6] = WALL
-        for i in range(7, x_dim - 7):
-            self.occupancy_grid_map[i, y_dim - 8] = OBSTACLE_Z2
-            self.occupancy_grid_map[i, y_dim - 7] = OBSTACLE_Z1
+        for i in range(5, x_dim - 13):
+            self.occupancy_grid_map[i, y_dim - 10] = WALL
+        for i in range(7, x_dim - 15):
+            self.occupancy_grid_map[i, y_dim - 11] = OBSTACLE_Z1
+            self.occupancy_grid_map[i, y_dim - 12] = OBSTACLE_Z2
 
-            # middle left wall of the room
-        for i in range(5, int((y_dim - 1)/2) - 5):
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 5, i] = WALL
-        for i in range(7, int((y_dim - 1) / 2) - 5):
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 3, i + 1] = OBSTACLE_Z2
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 4, i + 1] = OBSTACLE_Z1
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i + 1] = OBSTACLE_Z2
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 6, i + 1] = OBSTACLE_Z1
+        # Some obstacles
+        for i in range(42, 51):
+            self.occupancy_grid_map[x_dim - 14, i] = OBSTACLE
+            self.occupancy_grid_map[x_dim - 15, i] = OBSTACLE
+            # Ora of lower right obstacle (Noam)
+            self.occupancy_grid_map[x_dim - 16, i - 1] = OBSTACLE_Z1
+            self.occupancy_grid_map[x_dim - 17, i - 1] = OBSTACLE_Z2
+        self.occupancy_grid_map[x_dim - 14, 41] = OBSTACLE_Z1
+        self.occupancy_grid_map[x_dim - 15, 41] = OBSTACLE_Z1
+        self.occupancy_grid_map[x_dim - 14, 40] = OBSTACLE_Z2
+        self.occupancy_grid_map[x_dim - 15, 40] = OBSTACLE_Z2
 
-            # middle right wall of the room
-        for i in range(int((y_dim - 1)/2) + 5, y_dim - 5):
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 5, i] = WALL
-        for i in range(int((y_dim - 1) / 2) + 5, y_dim - 7):
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 3, i - 1] = OBSTACLE_Z2
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 4, i - 1] = OBSTACLE_Z1
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i - 1] = OBSTACLE_Z2
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 6, i - 1] = OBSTACLE_Z1
-
-            # Some obstacles
-        for i in range(41, 52):
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 6, i] = OBSTACLE
-            self.occupancy_grid_map[int((x_dim - 1)/2) + 7, i] = OBSTACLE
-
-        for i in range(15, 27):
-            self.occupancy_grid_map[33, i] = OBSTACLE
-            self.occupancy_grid_map[34, i] = OBSTACLE
+        for i in range(14, 28):
+            self.occupancy_grid_map[7, i] = OBSTACLE
+            self.occupancy_grid_map[6, i] = OBSTACLE
+            # Ora of upper left obstacle (Noam)
+            self.occupancy_grid_map[8, i] = OBSTACLE_Z1
+            self.occupancy_grid_map[9, i] = OBSTACLE_Z2
+        self.occupancy_grid_map[6, 14] = OBSTACLE_Z1
+        self.occupancy_grid_map[7, 14] = OBSTACLE_Z1
+        self.occupancy_grid_map[6, 13] = OBSTACLE_Z2
+        self.occupancy_grid_map[7, 13] = OBSTACLE_Z2
+        self.occupancy_grid_map[6, 27] = OBSTACLE_Z1
+        self.occupancy_grid_map[7, 27] = OBSTACLE_Z1
+        self.occupancy_grid_map[6, 28] = OBSTACLE_Z2
+        self.occupancy_grid_map[7, 28] = OBSTACLE_Z2
 
         # obstacles
         self.visited = {}
@@ -118,6 +190,14 @@ class OccupancyGridMap:
         #    raise IndexError("Map index out of bounds")
         return self.occupancy_grid_map[row][col] == UNOCCUPIED
 
+    def is_obstacles(self, pos: (int, int)) -> bool:
+        (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
+        (row, col) = (x, y)
+
+        is_unoccupied = True
+        if self.occupancy_grid_map[row][col] == OBSTACLE or self.occupancy_grid_map[row][col] == DYN_OBSTACLE or self.occupancy_grid_map[row][col] == WALL:
+            is_unoccupied = False
+        return is_unoccupied
 
     # Checks if there is a statis obstacle in this position (Dana)
     def is_static_obs(self, pos: (int, int)) -> bool:
@@ -215,16 +295,39 @@ class OccupancyGridMap:
         (row, col) = (x, y)
         self.occupancy_grid_map[row, col] = UNOCCUPIED
 
+
+
     # Find the free locations for setting the obstacles start position and goal (Dana)
     def find_zeros(self):
         zeros = []
-        for x in range(5,self.x_dim-5):
-            for y in range(5,self.y_dim-5):
+        for x in range(5, self.x_dim-13):
+            for y in range(10, self.y_dim-10):
                 pos = (x, y)
-                if self.is_unoccupied(pos=pos) and pos != (9, 9) and pos != (29, 19) and pos != (17, 45) :
+                if self.is_unoccupied(pos=pos) and pos != (15, 15) and pos != (32, 19) and pos != (17, 45):
                     zeros.append((x, y))
         return zeros
-    def local_observation(self, global_position: (int, int), view_range: int = 7) -> Dict:
+
+
+    # Find the free locations for setting the obstacles start position and goal (Dana)
+    def find_zeros_in_hall_left(self):
+        zeros = []
+        for x in range(self.x_dim-13, self.x_dim-5):
+            for y in range(1, 5):
+                pos = (x, y)
+                if self.is_unoccupied(pos=pos) and pos != (15, 15) and pos != (32, 19) and pos != (17, 45):
+                    zeros.append((x, y))
+        return zeros
+
+    def find_zeros_in_hall_right(self):
+        zeros = []
+        for x in range(self.x_dim-13, self.x_dim-5):
+            for y in range(self.y_dim - 5, self.y_dim-1):
+                pos = (x, y)
+                if self.is_unoccupied(pos=pos) and pos != (15, 15) and pos != (32, 19) and pos != (17, 45):
+                    zeros.append((x, y))
+        return zeros
+    
+    def local_observation(self, global_position: (int, int), view_range: int = 3) -> Dict:
         (px, py) = global_position
         # saves all the coordinates in the circle range
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
@@ -234,19 +337,22 @@ class OccupancyGridMap:
         return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
 
     # Count static obstacles (Dana)
-    def count_obstacles_local_observation(self, global_position: (int, int), view_range: int = 7):
+    def count_obstacles_local_observation(self, global_position: (int, int), view_range: int = 3):
         (px, py) = global_position
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
         count = 0
+        arr = []
         for node in nodes:
             if self.occupancy_grid_map[node] == OBSTACLE:
+                arr.append(node)
                 count += 1
+        print(arr)
         return count
 
     # Count dynamic obstacles (Dana)
-    def count_dynamic_obstacles_local_observation(self, global_position: (int, int), view_range: int = 7):
+    def count_dynamic_obstacles_local_observation(self, global_position: (int, int), view_range: int = 3):
         (px, py) = global_position
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
@@ -258,14 +364,14 @@ class OccupancyGridMap:
         return count
 
     # Checks minimal distance between obstacles (Dana)
-    def minimal_distance_local_observation(self, global_position: (int, int), view_range: int = 7):
+    def minimal_distance_local_observation(self, global_position: (int, int), view_range: int = 3):
         (px, py) = global_position
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
         min_dist = 7.0
         for node in nodes:
-            if not self.is_unoccupied(pos=node):
+            if not self.is_obstacles(pos=node):
                 dist = math.dist(node, global_position)
                 if min_dist > dist:
                     min_dist = dist
@@ -273,7 +379,7 @@ class OccupancyGridMap:
             return 0
         return min_dist
 
-    def average_distance_local_observation(self, global_position: (int, int), view_range: int = 7):
+    def average_distance_local_observation(self, global_position: (int, int), view_range: int = 3):
         (px, py) = global_position
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
@@ -281,7 +387,7 @@ class OccupancyGridMap:
         total_distance = 0
         obstacles = []
         for node in nodes:
-            if not self.is_unoccupied(pos=node):  # means that it is an obstacle
+            if not self.is_obstacles(pos=node):  # means that it is an obstacle
                 obstacles.append(node)
         for i in range(len(obstacles)):
             for j in range(i + 1, len(obstacles)):
@@ -294,14 +400,14 @@ class OccupancyGridMap:
             return average_distance
         return 0
 
-    def largest_angle_local_observation(self, global_position: (int, int), view_range: int = 7):
+    def largest_angle_local_observation(self, global_position: (int, int), view_range: int = 5):
         (px, py) = global_position
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
         obstacles = []
         for node in nodes:
-            if not self.is_unoccupied(pos=node):  # means that it is an obstacle
+            if not self.is_obstacles(pos=node):  # means that it is an obstacle
                 obstacles.append(node)
         largest_angle = 0
         angles = []

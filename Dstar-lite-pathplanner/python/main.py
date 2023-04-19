@@ -27,10 +27,10 @@ if __name__ == '__main__':
 
     x_dim = 41
     y_dim = 61
-    start = (9,9)
-    goalB = (29, 19)
+    start = (15,15)
+    goalB = (32, 19)
     goalC = (17, 45)
-    goalA = (9, 9)
+    goalA = (15, 15)
     goalDyn = []
     startDyn = []
     new_pos_dyn = []
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     path_list = []
     unoccupied_array = []
 
-    view_range = 5
+    view_range = 3
     global_var.arrivedA = True
     global_var.arrivedB1 = False
     global_var.arrivedB2 = False
@@ -62,14 +62,39 @@ if __name__ == '__main__':
 
     # Setting the start anf goal for every dynamic obstacle (Dana)
     unoccupied_array = new_map.find_zeros()
+    unoccupied_hall_left = new_map.find_zeros_in_hall_left()
+    unoccupied_hall_right = new_map.find_zeros_in_hall_right()
     for i in range(1, global_var.num_of_dyn_obs + 1):
-        s = random.choice(unoccupied_array)
-        startDyn.append(s)
-    for i in range(1, global_var.num_of_dyn_obs + 1):
-        g = random.choice(unoccupied_array)
-        goalDyn.append(g)
-        unoccupied_array.remove(g)
+        start_side = random.random()
+        if start_side <= 0.5:
+            s = random.choice(unoccupied_hall_right)
+            startDyn.append(s)
+            will_enter_room = random.random()
+            if will_enter_room <= 0.8:
+                g = random.choice(unoccupied_hall_left)
+            else:
+                g = random.choice(unoccupied_array)
+            goalDyn.append(g)
+        else:
+            s = random.choice(unoccupied_hall_left)
+            startDyn.append(s)
+            will_enter_room = random.random()
+            if will_enter_room <= 0.8:
+                g = random.choice(unoccupied_hall_right)
+            else:
+                g = random.choice(unoccupied_array)
+            goalDyn.append(g)
 
+    '''
+    for i in range(1, global_var.num_of_dyn_obs + 1):
+        will_enter_room = random.random()
+        if will_enter_room <= 0.8:
+            g = random.choice(unoccupied_hall_left)
+            goalDyn.append(g)
+        else:
+            g = random.choice(unoccupied_array)
+            goalDyn.append(g)
+    '''
     new_position = start
     last_position = start
 
@@ -135,9 +160,16 @@ if __name__ == '__main__':
                 path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
             else:
                 path_list[i - 1] = []
-                g = random.choice(unoccupied_array)
+                will_enter_room = random.random()
+                if will_enter_room <= 0.8:
+                    if goalDyn[i - 1] in unoccupied_hall_right:
+                        g = random.choice(unoccupied_hall_left)
+                    else:
+                        g = random.choice(unoccupied_hall_right)
+                else:
+                    g = random.choice(unoccupied_array)
                 goalDyn[i - 1] = g
-                unoccupied_array.remove(g)
+
                 dstar_obj = DStarLite(map=new_map,
                                       s_start=last_pos_dyn[i - 1],
                                       s_goal=goalDyn[i - 1],

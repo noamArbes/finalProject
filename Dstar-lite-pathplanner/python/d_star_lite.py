@@ -175,16 +175,13 @@ class DStarLite:
             min_s = float('inf')
             arg_min = None
             for s_ in succ:
-                #print("vals", self.s_start, s_, self.g[s_])
-                #print ("nn", self.c(self.s_start, s_) )
                 s = self.c(self.s_start, s_)
                 temp = self.c(self.s_start, s_) + self.g[s_]
-                #print("temp", temp)
                 if temp < min_s:
                     min_s = temp
                     arg_min = s_
             if arg_min == None:
-                print("ddd")
+                arg_min=s_
 
             self.sensed_map.remove_obstacle(obstacle_position)
             ### algorithm sometimes gets stuck here for some reason !!! FIX
@@ -221,6 +218,7 @@ class DStarLite:
             self.compute_shortest_path()
         #print("path found!")
         self.sensed_map.set_dynamic_obstacle(obstacle_position)
+
         return path_obstacle, self.g, self.rhs
 
 
