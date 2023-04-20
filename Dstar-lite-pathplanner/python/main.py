@@ -151,10 +151,15 @@ if __name__ == '__main__':
 
     def Dynamic_obs_movement():
         for i in range(1, global_var.num_of_dyn_obs + 1):
+            #  שלב ראשון פה יהיה למצוא מי השכנים דרך קריאה לפונקציה ששולחת את הערך של new_pos_dyn[i - 1] ומחזירה את כל השכנים מסביב - זהה לפונקציה local_observation בגריד
+            # אחכ את יכולה להוסיף את הלולאה של ההסרה שתרוץ על כל השכנים (הסינטקס יהיה ממש זהה לשתי השורות למטה, רק להכניס ללולאה והערך שיהיה בסוגריים במקום new_pos_dyn יהיה הערך של אותו שכן)
             gui.world.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the gui map (Dana)
             dstar_list[i - 1].sensed_map.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the grid map (g) (Dana)
             new_pos_dyn[i - 1] = gui.currentDyn[i - 1]
+            # פה תצטרכי לקרוא שוב לפונקציה שמוצאת את השכנים ולעדכן את השכנים
+            # כאן את יכולה להוסיף את הלולאה של הצבת הערך שתרוץ על כל השכנים (הסינטקס יהיה ממש זהה לשתי השורות למטה, רק להכניס ללולאה והערך שיהיה בסוגריים במקום new_pos_dyn יהיה הערך של אותו שכן)
             gui.world.set_dynamic_obstacle(new_pos_dyn[i - 1])  # Setting the value in the gui map (Dana)
+            dstar_list[i - 1].sensed_map.set_dynamic_obstacle(new_pos_dyn[i - 1]) # Setting the value in the grid map (g) (Dana)
         for i in range(1, global_var.num_of_dyn_obs + 1):
             if new_pos_dyn[i - 1] != goalDyn[i - 1]:
                 path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])

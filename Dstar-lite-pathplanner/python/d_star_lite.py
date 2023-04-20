@@ -217,7 +217,6 @@ class DStarLite:
 
             self.compute_shortest_path()
         #print("path found!")
-        self.sensed_map.set_dynamic_obstacle(obstacle_position)
 
         return path_obstacle, self.g, self.rhs
 
