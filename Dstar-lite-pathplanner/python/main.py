@@ -37,6 +37,8 @@ if __name__ == '__main__':
     last_pos_dyn = []
     path_list = []
     unoccupied_array = []
+    counter = []
+
 
     view_range = 3
     global_var.arrivedA = True
@@ -102,6 +104,7 @@ if __name__ == '__main__':
     for i in range(1, global_var.num_of_dyn_obs + 1):
         new_pos_dyn.append(startDyn[i-1])
         last_pos_dyn.append(startDyn[i-1])
+        counter.append(0)
 
     # D* Lite (optimized)
     dstar1 = DStarLite(map=new_map,
@@ -149,17 +152,67 @@ if __name__ == '__main__':
 
         return old_map, last_position, new_position
 
+    def wait(counter):
+        if counter < 10:
+            counter += 1
+        else:
+            counter = 0
+        return counter
     def Dynamic_obs_movement():
         for i in range(1, global_var.num_of_dyn_obs + 1):
+            gui.world.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the gui map (Dana)
+            dstar_list[i - 1].sensed_map.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the grid map (g) (Dana)
+            new_pos_dyn[i - 1] = gui.currentDyn[i - 1]
+            gui.world.set_dynamic_obstacle(new_pos_dyn[i - 1])  # Setting the value in the gui map (Dana)
+            dstar_list[i - 1].sensed_map.set_dynamic_obstacle(new_pos_dyn[i - 1]) # Setting the value in the grid map (g) (Dana)
+        for i in range(1, global_var.num_of_dyn_obs + 1):
+            if new_pos_dyn[i - 1] != goalDyn[i - 1]:
+                path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
+            else:
+                counter[i - 1] = wait(counter[i-1])
+                if counter[i - 1] == 10:
+                    path_list[i - 1] = []
+                    will_enter_room = random.random()
+                    if will_enter_room <= 0.8:
+                        if goalDyn[i - 1] in unoccupied_hall_right:
+                            goal = random.choice(unoccupied_hall_left)
+                        else:
+                            goal = random.choice(unoccupied_hall_right)
+                    else:
+                        goal = random.choice(unoccupied_array)
+                    goalDyn[i - 1] = goal
+
+                    dstar_obj = DStarLite(map=new_map,
+                                          s_start=last_pos_dyn[i - 1],
+                                          s_goal=goalDyn[i - 1],
+                                          value=DYN_OBSTACLE)
+                    dstar_list[i - 1] = dstar_obj
+                    path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
+
+    '''
+
+
+    def Dynamic_obs_movement():
+        for i in range(1, global_var.num_of_dyn_obs + 1):
+            neighbors = slam.dyn_obs_neighbors(new_pos_dyn[i - 1])
+            for n in neighbors:
+               gui.world.remove_obstacle(n)  # Remove the value from the gui map (Dana)
+               dstar_list[i - 1].sensed_map.remove_obstacle(n)  # Remove the value from the grid map (g) (Dana)
             #  שלב ראשון פה יהיה למצוא מי השכנים דרך קריאה לפונקציה ששולחת את הערך של new_pos_dyn[i - 1] ומחזירה את כל השכנים מסביב - זהה לפונקציה local_observation בגריד
             # אחכ את יכולה להוסיף את הלולאה של ההסרה שתרוץ על כל השכנים (הסינטקס יהיה ממש זהה לשתי השורות למטה, רק להכניס ללולאה והערך שיהיה בסוגריים במקום new_pos_dyn יהיה הערך של אותו שכן)
             gui.world.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the gui map (Dana)
             dstar_list[i - 1].sensed_map.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the grid map (g) (Dana)
             new_pos_dyn[i - 1] = gui.currentDyn[i - 1]
+            neighbors = slam.dyn_obs_neighbors(new_pos_dyn[i - 1])
+            for n in neighbors:
+               gui.world.set_dynamic_obstacle_neighbors(n)  # Setting the value in the gui map (Dana)
+               dstar_list[i - 1].sensed_map.set_dynamic_obstacle_neighbors(n)  # Setting the value in the grid map (g) (Dana)
             # פה תצטרכי לקרוא שוב לפונקציה שמוצאת את השכנים ולעדכן את השכנים
             # כאן את יכולה להוסיף את הלולאה של הצבת הערך שתרוץ על כל השכנים (הסינטקס יהיה ממש זהה לשתי השורות למטה, רק להכניס ללולאה והערך שיהיה בסוגריים במקום new_pos_dyn יהיה הערך של אותו שכן)
             gui.world.set_dynamic_obstacle(new_pos_dyn[i - 1])  # Setting the value in the gui map (Dana)
-            dstar_list[i - 1].sensed_map.set_dynamic_obstacle(new_pos_dyn[i - 1]) # Setting the value in the grid map (g) (Dana)
+            dstar_list[i - 1].sensed_map.set_dynamic_obstacle(
+                new_pos_dyn[i - 1])  # Setting the value in the grid map (g) (Dana)
+
         for i in range(1, global_var.num_of_dyn_obs + 1):
             if new_pos_dyn[i - 1] != goalDyn[i - 1]:
                 path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
@@ -181,9 +234,7 @@ if __name__ == '__main__':
                                       value=DYN_OBSTACLE)
                 dstar_list[i - 1] = dstar_obj
                 path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
-
-
-
+    '''
     # Run simulation
     while global_var.counter_runs < 3 and gui.done == False:
         if gui.done == True:

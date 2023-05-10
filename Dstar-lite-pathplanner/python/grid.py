@@ -188,6 +188,11 @@ class OccupancyGridMap:
 
         # if not self.in_bounds(cell=(x, y)):
         #    raise IndexError("Map index out of bounds")
+        is_unoccupied = True
+        #if self.occupancy_grid_map[row][col] != UNOCCUPIED and self.occupancy_grid_map[row][col] != OBSTACLE_Z2:
+        #    is_unoccupied = False
+        #print(pos, is_unoccupied)
+        #return is_unoccupied
         return self.occupancy_grid_map[row][col] == UNOCCUPIED
 
     def is_obstacles(self, pos: (int, int)) -> bool:
@@ -249,7 +254,7 @@ class OccupancyGridMap:
         return [node for node in neighbors if self.in_bounds(node)]
 
     # This function checks all the points around the robot/dynamic obstacle position to calculate the next step (Dana)
-    def succ(self, vertex: (int, int), avoid_obstacles: bool = True) -> list:
+    def succ(self, vertex: (int, int), avoid_obstacles: bool = False) -> list:
         """
         :param avoid_obstacles:
         :param vertex: vertex you want to find direct successors from
@@ -285,7 +290,14 @@ class OccupancyGridMap:
         (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
         (row, col) = (x, y)
         self.occupancy_grid_map[row, col] = DYN_OBSTACLE
-
+    def set_dynamic_obstacle_neighbors(self, pos: (int, int)):
+        """
+        :param pos: cell position we wish to set obstacle
+        :return: None
+        """
+        (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
+        (row, col) = (x, y)
+        self.occupancy_grid_map[row, col] = OBSTACLE_Z2
     def remove_obstacle(self, pos: (int, int)):
         """
         :param pos: position of obstacle
@@ -311,7 +323,8 @@ class OccupancyGridMap:
     # Find the free locations for setting the obstacles start position and goal (Dana)
     def find_zeros_in_hall_left(self):
         zeros = []
-        for x in range(self.x_dim-13, self.x_dim-5):
+        for x in range(self.x_dim-10, self.x_dim-7):
+            print(x)
             for y in range(1, 5):
                 pos = (x, y)
                 if self.is_unoccupied(pos=pos) and pos != (15, 15) and pos != (32, 19) and pos != (17, 45):
@@ -320,7 +333,7 @@ class OccupancyGridMap:
 
     def find_zeros_in_hall_right(self):
         zeros = []
-        for x in range(self.x_dim-13, self.x_dim-5):
+        for x in range(self.x_dim-10, self.x_dim-7):
             for y in range(self.y_dim - 5, self.y_dim-1):
                 pos = (x, y)
                 if self.is_unoccupied(pos=pos) and pos != (15, 15) and pos != (32, 19) and pos != (17, 45):
@@ -333,8 +346,16 @@ class OccupancyGridMap:
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
-        # we need check if we need to understand how to check if dynamic or static (Dana)
         return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
+
+    def dyn_obs_neighbors(self, global_position: (int, int)) -> Dict:
+        (px, py) = global_position
+        # saves all the coordinates in the circle range
+        nodes = [(x, y) for x in range(px - 2, px + 2)
+                 for y in range(py - 2, py + 2)
+                 if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= 1]
+        return {node: UNOCCUPIED if self.is_unoccupied(pos=node) else OBSTACLE for node in nodes}
+
 
     # Count static obstacles (Dana)
     def count_obstacles_local_observation(self, global_position: (int, int), view_range: int = 3):
@@ -348,7 +369,6 @@ class OccupancyGridMap:
             if self.occupancy_grid_map[node] == OBSTACLE:
                 arr.append(node)
                 count += 1
-        print(arr)
         return count
 
     # Count dynamic obstacles (Dana)
@@ -472,7 +492,14 @@ class SLAM:
         else:
             return heuristic(u, v)
 
-    # We need to see if we should move this function to the second class (Dana)
+    def dyn_obs_neighbors(self, global_position: (int, int), view_range: int = 1) -> Dict:
+        (px, py) = global_position
+        # saves all the coordinates in the circle range
+        nodes =[(x, y) for x in range(px - view_range - 1, px + view_range + 1)
+                 for y in range(py - view_range - 1, py + view_range + 1)
+                 if self.ground_truth_map.in_bounds((x, y)) and math.dist((x, y), global_position) <= math.sqrt(2)]
+        return {node: UNOCCUPIED if self.ground_truth_map.is_unoccupied(pos=node) else OBSTACLE_Z1 for node in nodes}
+
     def rescan(self, global_position: (int, int)):
         if self.vector==[]:
             s = ('Number of static obstacles', 'Number of dynamic obstacles', 'Minimum distance from obstacle', 'Average distance from obstacles', 'Largest free angle', 'Section of fail', 'Run number', 'Robot position')

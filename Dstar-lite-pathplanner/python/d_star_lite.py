@@ -39,7 +39,6 @@ class DStarLite:
         :param s: the vertex we want to calculate key
         :return: Priority class of the two keys
         """
-        #print(s)
         k1 = min(self.g[s], self.rhs[s]) + heuristic(self.s_start, s) + self.k_m
         k2 = min(self.g[s], self.rhs[s])
         return Priority(k1, k2)
@@ -52,7 +51,7 @@ class DStarLite:
         :return: euclidean distance to traverse. inf if obstacle in path
         """
         #if not self.sensed_map.is_static_obs(u) or not self.sensed_map.is_static_obs(v) or not self.sensed_map.is_dyn_obs(u) or not self.sensed_map.is_dyn_obs(v):
-        if not self.sensed_map.is_unoccupied(u) or not self.sensed_map.is_unoccupied(v):
+        if not self.sensed_map.is_unoccupied(v):
             #print("prob")
             return float('inf')
         else:
@@ -118,7 +117,7 @@ class DStarLite:
 
         while self.s_start != self.s_goal:
             assert (self.rhs[self.s_start] != float('inf')), "There is no known path!"
-            succ = self.sensed_map.succ(self.s_start, avoid_obstacles=True) # return the list of neighbors
+            succ = self.sensed_map.succ(self.s_start, avoid_obstacles=False) # return the list of neighbors
             min_s = float('inf')
             arg_min = None
             for s_ in succ:
@@ -161,8 +160,8 @@ class DStarLite:
         return path, self.g, self.rhs
 
     def move_and_replan_dyn(self, obstacle_position: (int, int)):
-
         path_obstacle = [obstacle_position]
+        print("obs", obstacle_position)
         self.s_start = obstacle_position
         self.s_last = self.s_start
         self.compute_shortest_path()
@@ -170,7 +169,7 @@ class DStarLite:
 
         while self.s_start != self.s_goal: # while the obstacle didn't reach the goal
 
-            succ = self.sensed_map.succ(self.s_start, avoid_obstacles=True)
+            succ = self.sensed_map.succ(self.s_start, avoid_obstacles=False)
             #print("sss", succ)
             min_s = float('inf')
             arg_min = None
@@ -180,9 +179,12 @@ class DStarLite:
                 if temp < min_s:
                     min_s = temp
                     arg_min = s_
-            if arg_min == None:
-                arg_min=s_
-
+            #if arg_min == None:
+            #    print ("HHH", succ[0])
+            #    print(succ)
+            #    print("start", self.s_start)
+            #    arg_min = succ[0]
+#
             self.sensed_map.remove_obstacle(obstacle_position)
             ### algorithm sometimes gets stuck here for some reason !!! FIX
             self.s_start = arg_min
