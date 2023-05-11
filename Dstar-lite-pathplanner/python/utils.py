@@ -37,7 +37,6 @@ def heuristic(p: (int, int), q: (int, int)) -> float:
     :return: manhattan distance
     """
     #This returns an error when we put too much obstacles under the robot (Dana)
-
     return math.sqrt((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2)
 
 

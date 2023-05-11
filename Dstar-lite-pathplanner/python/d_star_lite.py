@@ -9,6 +9,7 @@ UNOCCUPIED = 0
 DYN_OBSTACLE = 100
 
 
+
 class DStarLite:
     def __init__(self, map: OccupancyGridMap, s_start: (int, int), s_goal: (int, int), value):
         """
@@ -40,7 +41,9 @@ class DStarLite:
         :return: Priority class of the two keys
         """
         k1 = min(self.g[s], self.rhs[s]) + heuristic(self.s_start, s) + self.k_m
+        print("k1", min(self.g[s], self.rhs[s]) + heuristic(self.s_start, s) + self.k_m)
         k2 = min(self.g[s], self.rhs[s])
+        print("k2", k2)
         return Priority(k1, k2)
 
     def c(self, u: (int, int), v: (int, int)) -> float:
@@ -51,12 +54,30 @@ class DStarLite:
         :return: euclidean distance to traverse. inf if obstacle in path
         """
         #if not self.sensed_map.is_static_obs(u) or not self.sensed_map.is_static_obs(v) or not self.sensed_map.is_dyn_obs(u) or not self.sensed_map.is_dyn_obs(v):
-        if not self.sensed_map.is_unoccupied(v):
-            #print("prob")
+        if not self.sensed_map.is_unoccupied(u) or not self.sensed_map.is_unoccupied(v):
             return float('inf')
         else:
             return heuristic(u, v) # compute distance between two points
 
+    def c_dyn(self, u: (int, int), v: (int, int)) -> float:
+        """
+        calcuclate the cost between nodes
+        :param u: from vertex
+        :param v: to vertex
+        :return: euclidean distance to traverse. inf if obstacle in path
+        """
+        print("HH")
+        #if not self.sensed_map.is_static_obs(u) or not self.sensed_map.is_static_obs(v) or not self.sensed_map.is_dyn_obs(u) or not self.sensed_map.is_dyn_obs(v):
+        if not self.sensed_map.is_unoccupied(u) or not self.sensed_map.is_unoccupied(v):
+            #print("prob")
+            if self.sensed_map.occupancy_grid_map[v] == 10 or self.sensed_map.occupancy_grid_map[v] == 100 or \
+                    self.sensed_map.occupancy_grid_map[u] == 10 or self.sensed_map.occupancy_grid_map[u] == 100:
+                print("here")
+                return heuristic(u, v)  # compute distance between two points
+            else:
+                return float('inf')
+        else:
+            return heuristic(u, v) # compute distance between two points
     def contain(self, u: (int, int)) -> (int, int):
         return u in self.U.vertices_in_heap
 
@@ -68,6 +89,41 @@ class DStarLite:
         elif self.g[u] == self.rhs[u] and self.contain(u):
             self.U.remove(u)
 
+    def compute_shortest_path_dyn(self):
+        #print("s ", self.s_start)
+        #if self.s_start == None:
+        #   print("here")
+        while self.U.top_key() < self.calculate_key(self.s_start) or self.rhs[self.s_start] > self.g[self.s_start]:
+            u = self.U.top()
+            k_old = self.U.top_key()
+            k_new = self.calculate_key(u)
+
+            if k_old < k_new:
+                self.U.update(u, k_new)
+            elif self.g[u] > self.rhs[u]:
+                self.g[u] = self.rhs[u]
+                self.U.remove(u)
+                pred = self.sensed_map.succ(vertex=u)
+                for s in pred:
+                    if s != self.s_goal:
+                        self.rhs[s] = min(self.rhs[s], self.c_dyn(s, u) + self.g[u])
+                    self.update_vertex(s)
+            else:
+                self.g_old = self.g[u]
+                self.g[u] = float('inf')
+                pred = self.sensed_map.succ(vertex=u)
+                pred.append(u)
+                for s in pred:
+                    if self.rhs[s] == self.c_dyn(s, u) + self.g_old:
+                        if s != self.s_goal:
+                            min_s = float('inf')
+                            succ = self.sensed_map.succ(vertex=s)
+                            for s_ in succ:
+                                temp = self.c_dyn(s, s_) + self.g[s_]
+                                if min_s > temp:
+                                    min_s = temp
+                            self.rhs[s] = min_s
+                    self.update_vertex(u)
     def compute_shortest_path(self):
         #print("s ", self.s_start)
         #if self.s_start == None:
@@ -103,7 +159,6 @@ class DStarLite:
                                     min_s = temp
                             self.rhs[s] = min_s
                     self.update_vertex(u)
-
     def rescan(self) -> Vertices:
         new_edges_and_old_costs = self.new_edges_and_old_costs
         self.new_edges_and_old_costs = None
@@ -116,7 +171,7 @@ class DStarLite:
         self.compute_shortest_path()
 
         while self.s_start != self.s_goal:
-            assert (self.rhs[self.s_start] != float('inf')), "There is no known path!"
+#            assert (self.rhs[self.s_start] != float('inf')), "There is no known path!"
             succ = self.sensed_map.succ(self.s_start, avoid_obstacles=False) # return the list of neighbors
             min_s = float('inf')
             arg_min = None
@@ -125,6 +180,8 @@ class DStarLite:
                 if temp < min_s:
                     min_s = temp
                     arg_min = s_
+            if arg_min == None:
+                arg_min = self.s_start
 
             ### algorithm sometimes gets stuck here for some reason !!! FIX
             self.s_start = arg_min
@@ -164,7 +221,7 @@ class DStarLite:
         print("obs", obstacle_position)
         self.s_start = obstacle_position
         self.s_last = self.s_start
-        self.compute_shortest_path()
+        self.compute_shortest_path_dyn()
 
 
         while self.s_start != self.s_goal: # while the obstacle didn't reach the goal
@@ -174,16 +231,13 @@ class DStarLite:
             min_s = float('inf')
             arg_min = None
             for s_ in succ:
-                s = self.c(self.s_start, s_)
-                temp = self.c(self.s_start, s_) + self.g[s_]
+                s = self.c_dyn(self.s_start, s_)
+                temp = self.c_dyn(self.s_start, s_) + self.g[s_]
                 if temp < min_s:
                     min_s = temp
                     arg_min = s_
-            #if arg_min == None:
-            #    print ("HHH", succ[0])
-            #    print(succ)
-            #    print("start", self.s_start)
-            #    arg_min = succ[0]
+            if arg_min == None:
+                arg_min = self.s_start
 #
             self.sensed_map.remove_obstacle(obstacle_position)
             ### algorithm sometimes gets stuck here for some reason !!! FIX
@@ -202,22 +256,22 @@ class DStarLite:
                     v = vertex.pos
                     succ_v = vertex.edges_and_c_old
                     for u, c_old in succ_v.items():
-                        c_new = self.c(u, v)
+                        c_new = self.c_dyn(u, v)
                         if c_old > c_new:
                             if u != self.s_goal:
-                                self.rhs[u] = min(self.rhs[u], self.c(u, v) + self.g[v])
+                                self.rhs[u] = min(self.rhs[u], self.c_dyn(u, v) + self.g[v])
                         elif self.rhs[u] == c_old + self.g[v]:
                             if u != self.s_goal:
                                 min_s = float('inf')
                                 succ_u = self.sensed_map.succ(vertex=u)
                                 for s_ in succ_u:
-                                    temp = self.c(u, s_) + self.g[s_]
+                                    temp = self.c_dyn(u, s_) + self.g[s_]
                                     if min_s > temp:
                                         min_s = temp
                                 self.rhs[u] = min_s
                             self.update_vertex(u)
 
-            self.compute_shortest_path()
+            self.compute_shortest_path_dyn()
         #print("path found!")
 
         return path_obstacle, self.g, self.rhs

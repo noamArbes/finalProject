@@ -113,9 +113,9 @@ class OccupancyGridMap:
 
             # bottom wall of the room
         for i in range(0, y_dim):
-            self.occupancy_grid_map[x_dim - 5, i] = WALL
-            self.occupancy_grid_map[x_dim - 6, i] = OBSTACLE_Z1
-            self.occupancy_grid_map[x_dim - 7, i] = OBSTACLE_Z2
+            self.occupancy_grid_map[x_dim - 3, i] = WALL
+            self.occupancy_grid_map[x_dim - 4, i] = OBSTACLE_Z1
+            self.occupancy_grid_map[x_dim - 5, i] = OBSTACLE_Z2
 
             # left wall of the room
         for i in range(5, x_dim - 13):
@@ -157,6 +157,20 @@ class OccupancyGridMap:
         self.occupancy_grid_map[7, 27] = OBSTACLE_Z1
         self.occupancy_grid_map[6, 28] = OBSTACLE_Z2
         self.occupancy_grid_map[7, 28] = OBSTACLE_Z2
+
+        for i in range(15,22):
+            for j in range(29, 35):
+                self.occupancy_grid_map[i,j] = OBSTACLE
+        for i in range(15,22):
+            self.occupancy_grid_map[i, 28] = OBSTACLE_Z1
+            self.occupancy_grid_map[i, 27] = OBSTACLE_Z2
+            self.occupancy_grid_map[i, 35] = OBSTACLE_Z1
+            self.occupancy_grid_map[i, 36] = OBSTACLE_Z2
+        for i in range(29, 35):
+            self.occupancy_grid_map[14, i] = OBSTACLE_Z1
+            self.occupancy_grid_map[13, i] = OBSTACLE_Z2
+            self.occupancy_grid_map[22, i] = OBSTACLE_Z1
+            self.occupancy_grid_map[23, i] = OBSTACLE_Z2
 
         # obstacles
         self.visited = {}
@@ -297,7 +311,10 @@ class OccupancyGridMap:
         """
         (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
         (row, col) = (x, y)
-        self.occupancy_grid_map[row, col] = OBSTACLE_Z2
+        if self.occupancy_grid_map[row,col] != OBSTACLE_Z2:
+            self.occupancy_grid_map[row, col] = 10
+
+
     def remove_obstacle(self, pos: (int, int)):
         """
         :param pos: position of obstacle
@@ -499,7 +516,33 @@ class SLAM:
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.ground_truth_map.in_bounds((x, y)) and math.dist((x, y), global_position) <= math.sqrt(2)]
         return {node: UNOCCUPIED if self.ground_truth_map.is_unoccupied(pos=node) else OBSTACLE_Z1 for node in nodes}
+    def set_dynamic_obstacle_neighbors(self, pos: (int, int)):
+        """
+        :param pos: cell position we wish to set obstacle
+        :return: None
+        """
+        (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
+        (row, col) = (x, y)
+        if self.slam_map[row,col] != OBSTACLE_Z2 and self.slam_map[row,col] != DYN_OBSTACLE:
+            self.slam_map[row, col] = 10
 
+    def remove_obstacle(self, pos: (int, int)):
+        """
+        :param pos: position of obstacle
+        :return: None
+        """
+        (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
+        (row, col) = (x, y)
+        self.ground_truth_map[row, col] = UNOCCUPIED
+
+    def set_dynamic_obstacle(self, pos: (int, int)):
+        """
+        :param pos: cell position we wish to set obstacle
+        :return: None
+        """
+        (x, y) = (round(pos[0]), round(pos[1]))  # make sure pos is int
+        (row, col) = (x, y)
+        self.ground_truth_map[row, col] = DYN_OBSTACLE
     def rescan(self, global_position: (int, int)):
         if self.vector==[]:
             s = ('Number of static obstacles', 'Number of dynamic obstacles', 'Minimum distance from obstacle', 'Average distance from obstacles', 'Largest free angle', 'Section of fail', 'Run number', 'Robot position')

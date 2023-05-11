@@ -36,6 +36,8 @@ colors = {
     20: OBSTACLE_Z2,
     100: DYN_OBSTACLE,
     255: WALL,
+    10: UNOCCUPIED,
+
 }
 
 
