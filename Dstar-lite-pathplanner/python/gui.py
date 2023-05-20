@@ -37,7 +37,7 @@ colors = {
     100: DYN_OBSTACLE,
     255: WALL,
     10: UNOCCUPIED,
-
+    30: UNOCCUPIED,
 }
 
 
@@ -179,77 +179,102 @@ class Animation:
         if path_obstacle is None:
             path_obstacle = []
 
+
         # automatic (Dana)
-        if path_robot:
-            (x, y) = path_robot[1]
-            self.set_position((x, y))
-        counter = 0
-        # Set the dynamic obstacle in the grid to be recognized as an obstacle (Dana)
-        for path in path_obstacle:
-            if self.get_positionDyn(counter) != self.goalDyn[counter]:
-                if len(path) >1:
-                    #print(path[1])
-                    (x, y) = path[1]
-                    self.set_positionDyn((x, y), counter)
-                    counter += 1
+        if global_var.is_automatic:
+            if path_robot:
+
+                (x, y) = path_robot[1]
+                self.set_position((x, y))
+            counter = 0
+            # Set the dynamic obstacle in the grid to be recognized as an obstacle (Dana)
+            for path in path_obstacle:
+                if self.get_positionDyn(counter) != self.goalDyn[counter]:
+                    if len(path) >1:
+                        #print(path[1])
+                        (x, y) = path[1]
+                        self.set_positionDyn((x, y), counter)
+                        counter += 1
 
         grid_cell = None
-        for event in pygame.event.get():
+        if global_var.is_automatic == False:
+            counter = 0
+            for path in path_obstacle:
+                if self.get_positionDyn(counter) != self.goalDyn[counter]:
+                    if len(path) >1:
+                        #print(path[1])
+                        (x, y) = path[1]
+                        self.set_positionDyn((x, y), counter)
+                        counter += 1
+            for event in pygame.event.get():
+                if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) or self.cont :
+                    # space bar pressed. call next action
+                    if path_robot:
+                        (x, y) = path_robot[1]
+                        self.set_position((x, y))
+            for event in pygame.event.get():
 
-            if event.type == pygame.QUIT:  # if user clicked close
-                print("quit")
-                self.done = True  # flag that we are done so we can exit loop
-            # manual (Dana)
-            elif (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) or self.cont:
-                # space bar pressed. call next action
-                if path_robot:
-                    (x, y) = path_robot[1]
-                    self.set_position((x, y))
+                if event.type == pygame.QUIT:  # if user clicked close
+                    print("quit")
+                    self.done = True  # flag that we are done so we can exit loop
+                # manual (Dana)
+                if global_var.is_automatic == False:
+                    print("LOL")
+                    if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) or self.cont :
+                        # space bar pressed. call next action
+                        if path_robot:
+                            (x, y) = path_robot[1]
+                            self.set_position((x, y))
 
-
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
-                # print("backspace automates the press space")
-                if not self.cont:
-                    self.cont = True
-                else:
-                    self.cont = False
-
-
-            # set obstacle by holding left-click
-            elif pygame.mouse.get_pressed()[0]:
-                # User clicks the mouse. Get the position
-                (col, row) = pygame.mouse.get_pos()
-
-                # change the x/y screen coordinates to grid coordinates
-                x = row // (self.height + self.margin)
-                y = col // (self.width + self.margin)
-
-                # turn pos into cell
-                grid_cell = (x, y)
-
-                # set the location in the grid map
-                if self.world.is_unoccupied(grid_cell):
-                    self.world.set_obstacle(grid_cell)
-                    self.observation = {"pos": grid_cell, "type": OBSTACLE}
+                    elif event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
+                        # print("backspace automates the press space")
+                        if not self.cont:
+                            self.cont = True
+                        else:
+                            self.cont = False
 
 
-            # remove obstacle by holding right-click
-            elif pygame.mouse.get_pressed()[2]:
-                # User clicks the mouse. Get the position
-                (col, row) = pygame.mouse.get_pos()
 
-                # change the x/y screen coordinates to grid coordinates
-                x = row // (self.height + self.margin)
-                y = col // (self.width + self.margin)
 
-                # turn pos into cell
-                grid_cell = (x, y)
 
-                # set the location in the grid map
-                if not self.world.is_unoccupied(grid_cell):
-                    # print("grid cell: ".format(grid_cell))
-                    self.world.remove_obstacle(grid_cell)
-                    self.observation = {"pos": grid_cell, "type": UNOCCUPIED}
+
+
+
+                # set obstacle by holding left-click
+                elif pygame.mouse.get_pressed()[0]:
+                    # User clicks the mouse. Get the position
+                    (col, row) = pygame.mouse.get_pos()
+
+                    # change the x/y screen coordinates to grid coordinates
+                    x = row // (self.height + self.margin)
+                    y = col // (self.width + self.margin)
+
+                    # turn pos into cell
+                    grid_cell = (x, y)
+
+                    # set the location in the grid map
+                    if self.world.is_unoccupied(grid_cell):
+                        self.world.set_obstacle(grid_cell)
+                        self.observation = {"pos": grid_cell, "type": OBSTACLE}
+
+
+                # remove obstacle by holding right-click
+                elif pygame.mouse.get_pressed()[2]:
+                    # User clicks the mouse. Get the position
+                    (col, row) = pygame.mouse.get_pos()
+
+                    # change the x/y screen coordinates to grid coordinates
+                    x = row // (self.height + self.margin)
+                    y = col // (self.width + self.margin)
+
+                    # turn pos into cell
+                    grid_cell = (x, y)
+
+                    # set the location in the grid map
+                    if not self.world.is_unoccupied(grid_cell):
+                        # print("grid cell: ".format(grid_cell))
+                        self.world.remove_obstacle(grid_cell)
+                        self.observation = {"pos": grid_cell, "type": UNOCCUPIED}
 
         # set the screen background
         self.screen.fill(BLACK)
