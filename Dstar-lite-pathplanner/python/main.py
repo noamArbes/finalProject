@@ -8,7 +8,6 @@ import os
 import pygame
 import random
 
-# Check if to delete- don't think it's in use (Noam)
 OBSTACLE = 255
 DYN_OBSTACLE = 100
 DYN_OBSTACLE_T2 = 150
@@ -289,13 +288,6 @@ if __name__ == '__main__':
                     path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
     '''
 
-    def wait(i):
-        if counter_stop[i-1] < 10:
-            counter_stop[i-1] += 1
-        else:
-            counter_stop[i-1] = 0
-
-
     # Run simulation
     while global_var.counter_runs < 2 and gui.done == False and global_var.done == False:
         if gui.done == True or global_var.done == True:
@@ -311,14 +303,8 @@ if __name__ == '__main__':
         # first navigation to goalB (Noam)
         while global_var.arrivedA == True and global_var.arrivedB1 == False and global_var.arrivedB2 == False and \
                 global_var.arrivedC == False and gui.done == False and global_var.done == False:
-            #gui.world.remove_obstacle(new_position)
-            #dstar1.sensed_map.remove_obstacle(new_position)
-
             slam.update_vector(global_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_list)
-            #gui.world.set_dynamic_obstacle(new_position)
-            #dstar1.sensed_map.set_dynamic_obstacle(new_position)
-
             Dynamic_obs_movement(dstar1)
             old_map, last_position, new_position = Robot_movement(last_position, dstar1)
 
@@ -339,16 +325,11 @@ if __name__ == '__main__':
         # navigation to goalC (Noam)
         while global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == False \
                 and global_var.arrivedC == False and gui.done == False and global_var.done == False:
-
-            #gui.world.remove_obstacle(new_position)
-            #dstar2.sensed_map.remove_obstacle(new_position)
             if is_first == 0:
                 path, g, rhs = dstar2.move_and_replan(robot_position=new_position)
 
             slam.update_vector(global_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_list)
-            #gui.world.set_dynamic_obstacle(new_position)
-            #dstar2.sensed_map.set_dynamic_obstacle(new_position)
 
             Dynamic_obs_movement(dstar2)
             old_map, last_position, new_position = Robot_movement(last_position, dstar2)
@@ -370,18 +351,13 @@ if __name__ == '__main__':
         # navigate to goalB the second time
         while global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == False \
                 and global_var.arrivedC == True and gui.done == False and global_var.done == False:
-            #gui.world.remove_obstacle(new_position)
-            #dstar1.sensed_map.remove_obstacle(new_position)
+
             if is_first == 0:
                 path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
 
             slam.update_vector(global_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_list)
-            #gui.world.set_dynamic_obstacle(new_position)
-            #dstar1.sensed_map.set_dynamic_obstacle(new_position)
-            for i in range(0,9):
-                if counter_stop[i] == 9:
-                    print("J")
+
             Dynamic_obs_movement(dstar1)
             old_map, last_position, new_position = Robot_movement(last_position, dstar1)
 
@@ -402,15 +378,11 @@ if __name__ == '__main__':
         while global_var.arrivedA == False and global_var.arrivedB1 == True and global_var.arrivedB2 == True \
                 and global_var.arrivedC == True and gui.done == False and global_var.done == False:
 
-            #gui.world.remove_obstacle(new_position)
-            #dstar3.sensed_map.remove_obstacle(new_position)
             if is_first == 0:
                 path, g, rhs = dstar3.move_and_replan(robot_position=new_position)
 
             slam.update_vector(global_position=new_position)
             gui.run_game(path_robot=path, path_obstacle=path_list)
-            #gui.world.set_dynamic_obstacle(new_position)
-            #dstar3.sensed_map.set_dynamic_obstacle(new_position)
 
             Dynamic_obs_movement(dstar3)
             old_map, last_position, new_position = Robot_movement(last_position, dstar3)
