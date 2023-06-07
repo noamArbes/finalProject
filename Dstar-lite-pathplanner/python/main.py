@@ -37,9 +37,9 @@ if __name__ == '__main__':
     path_list = []
     unoccupied_array = []
     counter_stop = []
+    clock = pygame.time.Clock()
 
-
-    view_range = 3
+    view_range = 5
     global_var.arrivedA = True
     global_var.arrivedB1 = False
     global_var.arrivedB2 = False
@@ -193,10 +193,12 @@ if __name__ == '__main__':
         for i in range(1, global_var.num_of_dyn_obs + 1):
             if new_pos_dyn[i - 1] != goalDyn[i - 1]:
                 neighbors = slam.dyn_obs_neighbors(new_pos_dyn[i - 1])
+                '''
                 for n in neighbors:
                     gui.world.remove_obstacle(n)  # Remove the value from the gui map (Dana)
                     dstar_list[i - 1].sensed_map.remove_obstacle(n)  # Remove the value from the grid map (g) (Dana)
                     dstar.sensed_map.remove_obstacle(n)  # Remove the value from the grid map (g) (Dana)
+                '''
                 gui.world.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the gui map (Dana)
                 dstar_list[i - 1].sensed_map.remove_obstacle(
                     new_pos_dyn[i - 1])  # Remove the value from the grid map (g) (Dana)
@@ -204,11 +206,13 @@ if __name__ == '__main__':
                 path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
                 new_pos_dyn[i - 1] = gui.currentDyn[i - 1]
                 neighbors = slam.dyn_obs_neighbors(new_pos_dyn[i - 1])
+                '''
                 for n in neighbors:
                     gui.world.set_dynamic_obstacle_neighbors(n)  # Setting the value in the gui map (Dana)
                     dstar_list[i - 1].sensed_map.set_dynamic_obstacle_neighbors(
                         n)  # Setting the value in the grid map (g) (Dana)
                     dstar.sensed_map.set_dynamic_obstacle_neighbors(n)  # Setting the value in the grid map (g) (Dana)
+                '''
                 gui.world.set_dynamic_obstacle(new_pos_dyn[i - 1])  # Setting the value in the gui map (Dana)
                 dstar_list[i - 1].sensed_map.set_dynamic_obstacle(
                     new_pos_dyn[i - 1])  # Setting the value in the grid map (g) (Dana)
@@ -289,13 +293,13 @@ if __name__ == '__main__':
     '''
 
     # Run simulation
-    while global_var.counter_runs < 2 and gui.done == False and global_var.done == False:
+    while global_var.counter_runs < 1 and gui.done == False and global_var.done == False:
         if gui.done == True or global_var.done == True:
             pygame.quit()
-        # Setting all the paths to the dynamic obstacles (Dana)
-        # move and compute path to the first path (Dana)
+        # move and compute path to the first goal (Dana)
         path, g, rhs = dstar1.move_and_replan(robot_position=new_position)
         if global_var.counter_runs == 0:
+            # Setting all the paths to the dynamic obstacles (Dana)
             for i in range(1, global_var.num_of_dyn_obs + 1):
                 path_obj, g, rhs = dstar_list[i-1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i-1])
                 path_list.append(path_obj)

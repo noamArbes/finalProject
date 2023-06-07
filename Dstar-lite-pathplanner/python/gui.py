@@ -183,7 +183,6 @@ class Animation:
         # automatic (Dana)
         if global_var.is_automatic:
             if path_robot:
-
                 (x, y) = path_robot[1]
                 self.set_position((x, y))
             counter = 0
@@ -191,7 +190,6 @@ class Animation:
             for path in path_obstacle:
                 if self.get_positionDyn(counter) != self.goalDyn[counter]:
                     if len(path) >1:
-                        #print(path[1])
                         (x, y) = path[1]
                         self.set_positionDyn((x, y), counter)
                         counter += 1
@@ -202,7 +200,6 @@ class Animation:
             for path in path_obstacle:
                 if self.get_positionDyn(counter) != self.goalDyn[counter]:
                     if len(path) >1:
-                        #print(path[1])
                         (x, y) = path[1]
                         self.set_positionDyn((x, y), counter)
                         counter += 1
@@ -219,7 +216,6 @@ class Animation:
                     self.done = True  # flag that we are done so we can exit loop
                 # manual (Dana)
                 if global_var.is_automatic == False:
-                    print("LOL")
                     if (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE) or self.cont :
                         # space bar pressed. call next action
                         if path_robot:
@@ -272,7 +268,6 @@ class Animation:
 
                     # set the location in the grid map
                     if not self.world.is_unoccupied(grid_cell):
-                        # print("grid cell: ".format(grid_cell))
                         self.world.remove_obstacle(grid_cell)
                         self.observation = {"pos": grid_cell, "type": UNOCCUPIED}
 
@@ -296,12 +291,12 @@ class Animation:
                                                (self.margin + self.height) * self.goalB[0] + self.margin,
                                                self.width,
                                                self.height])
-        # fill in the goalC cell with orange (Noam)
+        # fill in the goalC cell with orange
         pygame.draw.rect(self.screen, GOAL_C, [(self.margin + self.width) * self.goalC[1] + self.margin,
                                                (self.margin + self.height) * self.goalC[0] + self.margin,
                                                self.width,
                                                self.height])
-        # fill in the goalA cell with blue (Noam)
+        # fill in the goalA cell with blue
         pygame.draw.rect(self.screen, GOAL_A, [(self.margin + self.width) * self.goalA[1] + self.margin,
                                                (self.margin + self.height) * self.goalA[0] + self.margin,
                                                self.width,
