@@ -44,6 +44,7 @@ class OccupancyGridMap:
             self.occupancy_grid_map[x_dim - 12, i] = OBSTACLE_Z1
             self.occupancy_grid_map[x_dim - 14, i] = OBSTACLE_Z1
             self.occupancy_grid_map[x_dim - 15, i] = OBSTACLE_Z2
+
             # middle right wall of the room
         for i in range(y_dim - 25, y_dim):
             self.occupancy_grid_map[x_dim - 13, i] = WALL
@@ -52,28 +53,33 @@ class OccupancyGridMap:
             self.occupancy_grid_map[x_dim - 12, i] = OBSTACLE_Z1
             self.occupancy_grid_map[x_dim - 15, i] = OBSTACLE_Z2
             self.occupancy_grid_map[x_dim - 14, i] = OBSTACLE_Z1
+
         # upper wall of the room
         for i in range(10, y_dim - 10):
             self.occupancy_grid_map[5, i] = WALL
             self.occupancy_grid_map[6, i] = OBSTACLE_Z1
             self.occupancy_grid_map[7, i] = OBSTACLE_Z2
+
             # bottom wall of the room
         for i in range(0, y_dim):
             self.occupancy_grid_map[x_dim - 3, i] = WALL
             self.occupancy_grid_map[x_dim - 4, i] = OBSTACLE_Z1
             self.occupancy_grid_map[x_dim - 5, i] = OBSTACLE_Z2
+
             # left wall of the room
         for i in range(5, x_dim - 13):
             self.occupancy_grid_map[i, 10] = WALL
         for i in range(7, x_dim - 15):
             self.occupancy_grid_map[i, 11] = OBSTACLE_Z1
             self.occupancy_grid_map[i, 12] = OBSTACLE_Z2
+
             # right wall of the room
         for i in range(5, x_dim - 13):
             self.occupancy_grid_map[i, y_dim - 10] = WALL
         for i in range(7, x_dim - 15):
             self.occupancy_grid_map[i, y_dim - 11] = OBSTACLE_Z1
             self.occupancy_grid_map[i, y_dim - 12] = OBSTACLE_Z2
+
         # Some obstacles
         for i in range(42, 51):
             self.occupancy_grid_map[x_dim - 14, i] = OBSTACLE
@@ -401,13 +407,13 @@ class OccupancyGridMap:
         nodes = [(x, y) for x in range(px - view_range - 1, px + view_range + 1)
                  for y in range(py - view_range - 1, py + view_range + 1)
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
-        min_dist = 7.0
+        min_dist = 5.0
         for node in nodes:
-            if not self.is_obstacles(pos=node):
+            if not self.is_dyn_obs(pos=node):
                 dist = math.dist(node, global_position)
                 if min_dist > dist:
                     min_dist = dist
-        if min_dist >= 7.0:
+        if min_dist >= 5.0:
             return 0
         return min_dist
 
@@ -419,7 +425,7 @@ class OccupancyGridMap:
         total_distance = 0
         obstacles = []
         for node in nodes:
-            if not self.is_obstacles(pos=node):  # means that it is an obstacle
+            if not self.is_dyn_obs(pos=node):  # means that it is an obstacle
                 obstacles.append(node)
         for i in range(len(obstacles)):
             for j in range(i + 1, len(obstacles)):
@@ -439,7 +445,7 @@ class OccupancyGridMap:
                  if self.in_bounds((x, y)) and math.dist((x, y), global_position) <= view_range]
         obstacles = []
         for node in nodes:
-            if not self.is_obstacles(pos=node):  # means that it is an obstacle
+            if not self.is_dyn_obs(pos=node):  # means that it is an obstacle
                 obstacles.append(node)
         largest_angle = 0
         angles = []
@@ -549,7 +555,7 @@ class SLAM:
 
         num_dynamic_obstacles = self.ground_truth_map.count_dynamic_obstacles_local_observation(
             global_position=global_position,
-            view_range=5)
+            view_range=2)
 
         if num_dynamic_obstacles > 0:
             global_var.is_automatic = False
@@ -583,7 +589,7 @@ class SLAM:
         dyn_obs_pos = self.ground_truth_map.dyn_obs_pos(global_position=global_position,
                                                                               view_range=self.view_range)
         num_dyn_obs_for_stop = self.ground_truth_map.count_dynamic_obstacles_local_observation(global_position=global_position,
-                                                                              view_range=5)
+                                                                              view_range=2)
         is_stuck = global_var.is_automatic
         status = (num_obstacles, num_dynamic_obstacles, min_distance, average_distance, largest_angle, section_of_fail, global_var.counter_runs, global_position, obs_pos, dyn_obs_pos, is_stuck)
         self.vector.append(status)

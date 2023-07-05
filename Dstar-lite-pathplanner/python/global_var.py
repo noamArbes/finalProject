@@ -9,7 +9,7 @@ arrivedC = False
 global counter_runs
 counter_runs = 0
 global num_of_dyn_obs
-num_of_dyn_obs = 10
+num_of_dyn_obs = 5
 global done
 done = False
 global is_automatic

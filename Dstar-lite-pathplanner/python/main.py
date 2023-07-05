@@ -224,7 +224,7 @@ if __name__ == '__main__':
                 if counter_stop[i - 1] == 10:
                     path_list[i - 1] = []
                     will_enter_room = random.random()
-                    if will_enter_room <= 0.8:
+                    if will_enter_room <= 0.4:
                         if goalDyn[i - 1] in unoccupied_hall_right:
                             goal = random.choice(unoccupied_hall_left)
                         else:
@@ -248,52 +248,8 @@ if __name__ == '__main__':
                     counter_stop[i - 1] = 0
 
 
-
-    '''
-    def Dynamic_obs_movement():
-        for i in range(1, global_var.num_of_dyn_obs + 1):
-            neighbors = slam.dyn_obs_neighbors(new_pos_dyn[i - 1])
-            for n in neighbors:
-               gui.world.remove_obstacle(n)  # Remove the value from the gui map (Dana)
-               dstar_list[i - 1].sensed_map.remove_obstacle(n)  # Remove the value from the grid map (g) (Dana)
-            gui.world.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the gui map (Dana)
-            dstar_list[i - 1].sensed_map.remove_obstacle(new_pos_dyn[i - 1])  # Remove the value from the grid map (g) (Dana)
-            new_pos_dyn[i - 1] = gui.currentDyn[i - 1]
-            neighbors = slam.dyn_obs_neighbors(new_pos_dyn[i - 1])
-            for n in neighbors:
-               gui.world.set_dynamic_obstacle_neighbors(n) # Setting the value in the gui map (Dana)
-               dstar_list[i - 1].sensed_map.set_dynamic_obstacle_neighbors(n) # Setting the value in the grid map (g) (Dana)
-            gui.world.set_dynamic_obstacle(new_pos_dyn[i - 1]) # Setting the value in the gui map (Dana)
-            dstar_list[i - 1].sensed_map.set_dynamic_obstacle(new_pos_dyn[i - 1]) # Setting the value in the grid map (g) (Dana)
-
-        for i in range(1, global_var.num_of_dyn_obs + 1):
-            if new_pos_dyn[i - 1] != goalDyn[i - 1]:
-                path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
-            else:
-                count = wait(counter[i-1])
-                counter[i - 1] = count
-                if counter[i - 1] == 10:
-                    path_list[i - 1] = []
-                    will_enter_room = random.random()
-                    if will_enter_room <= 0.8:
-                        if goalDyn[i - 1] in unoccupied_hall_right:
-                            goal = random.choice(unoccupied_hall_left)
-                        else:
-                            goal = random.choice(unoccupied_hall_right)
-                    else:
-                        goal = random.choice(unoccupied_array)
-                    goalDyn[i - 1] = goal
-
-                    dstar_obj = DStarLite(map=new_map,
-                                          s_start=last_pos_dyn[i - 1],
-                                          s_goal=goalDyn[i - 1],
-                                          value=DYN_OBSTACLE)
-                    dstar_list[i - 1] = dstar_obj
-                    path_list[i - 1], g, rhs = dstar_list[i - 1].move_and_replan_dyn(obstacle_position=new_pos_dyn[i - 1])
-    '''
-
     # Run simulation
-    while global_var.counter_runs < 1 and gui.done == False and global_var.done == False:
+    while global_var.counter_runs < 2 and gui.done == False and global_var.done == False:
         if gui.done == True or global_var.done == True:
             pygame.quit()
         # move and compute path to the first goal (Dana)
